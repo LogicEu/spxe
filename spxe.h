@@ -12,6 +12,13 @@ Simple PiXel Engine
 @Eugenio Arteaga A.
 *******************
 
+Simple pixel engine written in C and OpenGL using
+GLFW. Meant to be extremely simple, lightweight,
+and easy to use. By initializing spxe you instantly 
+get an opened a window with a ready to use pixel 
+perfect render context, handing the user control 
+over every pixel that'll be rendered on the screen.
+
 As a header only solution, you need to define 
 SPXE_APPLICATION before including spxe.h to actually
 define the implementation of the engine.
@@ -25,10 +32,14 @@ these two lines:
 #define SPXE_APPLICATION
 #include <spxe.h>
 
+The only external dependency on MacOS is GLFW. 
+On Windows and Linux you also need GLEW.
+
 To compile use the following flags:
 
-MacOS: -framework OpenGL -lglfw
-Linux: -lGL -lGLUT -lglfw
+MacOS:      -framework OpenGL -lglfw
+Linux:      -lGL -lGLEW -lglfw
+Windows:    -lopengl32 -lglfw3dll -lglew32
 
 *************** Hello World Example ****************
 
@@ -40,7 +51,7 @@ int main(void)
     const int windowWidth = 800, windowHeight = 600;
     const int screenWidth = 200, screenHeight = 150;
     
-    unsigned char* pixels = spxeStart(
+    Px* pixbuffer = spxeStart(
         "Hello World", 
         windowWidth, 
         windowHeight, 
@@ -48,39 +59,51 @@ int main(void)
         screenHeight
     );
     
-    while (spxeRun(pixels)) {
+    while (spxeRun(pixbuffer)) {
         if (spxeKeyPressed(ESCAPE)) {
             break;
         }
     }
     
-    return spxeEnd(pixels);
+    return spxeEnd(pixbuffer);
 }
 
 ****************************************************/
 
 /*  Simple PiXel Engine  */
 
+typedef struct Px {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+    unsigned char a;
+} Px;
+
 /* spxe core */
-unsigned char* spxeStart(const char* title, const int winwidth, const int winheight, const int scrwidth, const int scrheight);
-int spxeRun(const unsigned char* pixels);
-int spxeEnd(unsigned char* pixels);
+Px*     spxeStart(          const char* title,
+                            const int   winwidth,   const int   winheight, 
+                            const int   scrwidth,   const int   scrheight   );
+int     spxeRun(            const Px*   pixbuffer                           );
+int     spxeEnd(            Px*         pixbuffer                           );
+Px*     spxePxGet(          const Px*   pixbuffer,  
+                            const int   x,          const int y             );
+void    spxePxSet(          Px*         dst,        const Px src            );
 
 /* time input */
-double spxeTime(void);
+double  spxeTime(           void                                            );
 
 /* keyboard input */
-int spxeKeyDown(const int key);
-int spxeKeyPressed(const int key);
-int spxeKeyReleased(const int key);
-char spxeKeyChar(void);
+int     spxeKeyDown(        const int   key                                 );
+int     spxeKeyPressed(     const int   key                                 );
+int     spxeKeyReleased(    const int   key                                 );
+char    spxeKeyChar(        void                                            );
 
 /* mouse input */
-void spxeMousePos(int* x, int* y);
-int spxeMouseDown(const int button);
-int spxeMousePressed(const int button);
-int spxeMouseReleased(const int button);
-void spxeMouseVisible(const int visible);
+void    spxeMousePos(       int*        x,          int*        y           );
+int     spxeMouseDown(      const int   button                              );        
+int     spxeMousePressed(   const int   button                              );
+int     spxeMouseReleased(  const int   button                              );
+void    spxeMouseVisible(   const int   visible                             );
 
 #ifdef __cplusplus
 }
@@ -280,7 +303,8 @@ int spxeMouseDown(const int button)
 int spxeMousePressed(const int button)
 {
     const int mouseButton = glfwGetMouseButton(spxe.window, button);
-    const int pressed = (mouseButton == GLFW_PRESS && spxe.input.mouseState == GLFW_RELEASE);
+    const int pressed = (mouseButton == GLFW_PRESS) && 
+                        (spxe.input.mouseState == GLFW_RELEASE);
     spxe.input.mouseState = mouseButton;
     return pressed;
 }
@@ -292,12 +316,15 @@ int spxeMouseReleased(const int button)
 
 void spxeMouseVisible(const int visible)
 {
-    glfwSetInputMode(spxe.window, GLFW_CURSOR, !visible ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(
+        spxe.window, GLFW_CURSOR, 
+        !visible ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL
+    );
 }
 
 /* spxe core */
 
-unsigned char* spxeStart(const char* title, 
+Px* spxeStart(          const char* title, 
     const int winwidth, const int winheight, 
     const int scrwidth, const int scrheight)
 {
@@ -340,7 +367,7 @@ unsigned char* spxeStart(const char* title,
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         printf("spxe failed to initiate glew.\n");
-        return;
+        return NULL;
     }
 #endif
 
@@ -350,14 +377,14 @@ unsigned char* spxeStart(const char* title,
     glDepthFunc(GL_LESS);
     
     /* allocate pixel framebuffer */
-    const size_t len = scrwidth * scrheight * 4;
-    unsigned char* pixels = malloc(len);
-    if (!pixels) {
+    const size_t len = scrwidth * scrheight * sizeof(Px);
+    Px* pixbuffer = malloc(len);
+    if (!pixbuffer) {
         printf("spxe failed to allocate pixel framebuffer.\n");
         return NULL;
     }
 
-    memset(pixels, 46, len);
+    memset(pixbuffer, 155, len);
 
     /* set global information */
     spxe.window = window;
@@ -419,37 +446,55 @@ unsigned char* spxeStart(const char* title,
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 
+        0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuffer
+    );
+
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    return pixels;
+    return pixbuffer;
 }
 
-int spxeRun(const unsigned char* pixels)
+int spxeRun(const Px* pixbuffer)
 {
     glClear(GL_COLOR_BUFFER_BIT);
     
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+    glTexImage2D(
+        GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 
+        0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuffer
+    );
+
     glGenerateMipmap(GL_TEXTURE_2D);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
     glfwSwapBuffers(spxe.window);
     glfwPollEvents();
     
-    return !glfwWindowShouldClose(spxe.window) && !!pixels;
+    return !glfwWindowShouldClose(spxe.window) && !!pixbuffer;
 }
 
-int spxeEnd(unsigned char* pixels)
+int spxeEnd(Px* pixbuffer)
 {
     glfwDestroyWindow(spxe.window);
     glfwTerminate();
     
-    if (!pixels) {
+    if (!pixbuffer) {
         return EXIT_FAILURE;
     }
     
-    free(pixels);
+    free(pixbuffer);
     return EXIT_SUCCESS;
+}
+
+Px* spxePxGet(const Px* pixbuffer, const int x, const int y)
+{
+    return (Px*)(size_t)(pixbuffer + (y * spxe.scrres.width + x));
+}
+
+void spxePxSet(Px* dest, const Px src)
+{
+    memcpy(dest, &src, sizeof(Px));
 }
 
 #else

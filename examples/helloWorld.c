@@ -6,7 +6,7 @@ int main(void)
     const int windowWidth = 800, windowHeight = 600;
     const int screenWidth = 200, screenHeight = 150;
     
-    unsigned char* pixels = spxeStart(
+    Px* pixbuffer = spxeStart(
         "Hello World", 
         windowWidth, 
         windowHeight, 
@@ -14,11 +14,11 @@ int main(void)
         screenHeight
     );
     
-    while (spxeRun(pixels)) {
+    while (spxeRun(pixbuffer)) {
         if (spxeKeyPressed(ESCAPE)) {
             break;
         }
     }
     
-    return spxeEnd(pixels);
+    return spxeEnd(pixbuffer);
 }

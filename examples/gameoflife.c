@@ -4,57 +4,58 @@
 #define SPXE_APPLICATION
 #include <spxe.h>
 
-#define pxat(px, width, x, y) (px[(((y) * (width)) + (x)) * 4])
+#define pxat(px, width, x, y) (px[(((y) * (width)) + (x))].r)
 
-static unsigned char black[4] = {0, 0, 0, 255};
-static unsigned char white[4] = {255, 255, 255, 255};
-static unsigned char red[4] = {255, 0, 0, 255};
+static Px black = {0, 0, 0, 255};
+static Px white = {255, 255, 255, 255};
+static Px red = {255, 0, 0, 255};
 
-static void pixelsInitRand(unsigned char* pixels, const size_t size)
+static void pixelsInitRand(Px* pixbuf, const size_t size)
 {
     for (size_t i = 0; i < size; ++i) {
-        memcpy(pixels + i * 4, rand() % 2 ? white : black, 4);
+        memcpy(pixbuf + i, rand() % 2 ? &white : &black, sizeof(Px));
     }
 }
 
-static void pixelsUpdate(unsigned char* pixels, const int width, const int height)
+static void pixelsUpdate(Px* pixbuf, const int width, const int height)
 {
     static int timers[3] = {1, 2, 3};
-    static unsigned char buf[0xffffff];
+    static Px buf[0xfffff];
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
         
             int count = 0;
-            count += (x + 1 < width) && pxat(pixels, width, x + 1, y);
-            count += (x + 1 < width) && (y > 0) && pxat(pixels, width, x + 1, y - 1);
-            count += (y > 0) && pxat(pixels, width, x, y - 1);
-            count += (x > 0) && (y > 0) && pxat(pixels, width, x - 1, y - 1);
-            count += (x > 0) && pxat(pixels, width, x - 1, y);
-            count += (x > 0) && (y + 1 < height) && pxat(pixels, width, x - 1, y + 1);
-            count += (y + 1 < height) && pxat(pixels, width, x, y + 1);
-            count += (x + 1 < width) && (y + 1 < height) && pxat(pixels, width, x + 1, y + 1);
+            count += (x + 1 < width) && pxat(pixbuf, width, x + 1, y);
+            count += (x + 1 < width) && (y > 0) && pxat(pixbuf, width, x + 1, y - 1);
+            count += (y > 0) && pxat(pixbuf, width, x, y - 1);
+            count += (x > 0) && (y > 0) && pxat(pixbuf, width, x - 1, y - 1);
+            count += (x > 0) && pxat(pixbuf, width, x - 1, y);
+            count += (x > 0) && (y + 1 < height) && pxat(pixbuf, width, x - 1, y + 1);
+            count += (y + 1 < height) && pxat(pixbuf, width, x, y + 1);
+            count += (x + 1 < width) && (y + 1 < height) && pxat(pixbuf, width, x + 1, y + 1);
 
-            const int index = (y * width + x) * 4;
-            if (pixels[index]) {
-                memcpy(buf + index, (count == 2 || count == 3) ? white : black, 4);
+            const int index = (y * width + x);
+            if (pixbuf[index].r) {
+                memcpy(buf + index, (count == 2 || count == 3) ? &white : &black, sizeof(Px));
             }
-            else memcpy(buf + index, (count == 3) ? white : black, 4);
+            else memcpy(buf + index, (count == 3) ? &white : &black, sizeof(Px));
         }
     }
 
-    memcpy(pixels, buf, width * height * 4);
+    memcpy(pixbuf, buf, width * height * sizeof(Px));
     
     // Color Update
+    unsigned char* col = (unsigned char*)&white;
     for (int i = 0; i < 3; ++i) {
-        if (white[i] - timers[i] < 120 || white[i] - timers[i] > 255) {
+        if (col[i] - timers[i] < 120 || col[i] - timers[i] > 255) {
             timers[i] = -timers[i];
         }
-        white[i] -= timers[i];
+        col[i] -= timers[i];
     }
 
-    black[1] += timers[0];
-    black[2] += timers[1];
+    black.g += timers[0];
+    black.b += timers[1];
 }
 
 int main(const int argc, char** argv)
@@ -69,28 +70,28 @@ int main(const int argc, char** argv)
         height = atoi(argv[2]);
     }
   
-    unsigned char* pixels = spxeStart("Conway's Game of Life", 800, 600, width, height);
+    Px* pixbuf = spxeStart("Conway's Game of Life", 800, 600, width, height);
 
     srand(time(NULL));
-    pixelsInitRand(pixels, width * height);
+    pixelsInitRand(pixbuf, width * height);
 
-    while (spxeRun(pixels)) {
+    while (spxeRun(pixbuf)) {
         
         if (spxeKeyPressed(ESCAPE) || spxeKeyPressed(Q)) {
             break;
         }
         
         if (spxeKeyPressed(R)) {
-            pixelsInitRand(pixels, width * height);
+            pixelsInitRand(pixbuf, width * height);
         }
         
         spxeMousePos(&mousex, &mousey);
 
-        pixelsUpdate(pixels, width, height);
+        pixelsUpdate(pixbuf, width, height);
         if (mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {
-            memcpy(&pxat(pixels, width, mousex, mousey), red, 4);
+            memcpy(pixbuf + mousey * width + mousex, &red, sizeof(Px));
         }
     }
     
-    return spxeEnd(pixels);
+    return spxeEnd(pixbuf);
 }

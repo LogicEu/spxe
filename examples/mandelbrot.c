@@ -4,7 +4,7 @@
 #define SPXE_APPLICATION
 #include <spxe.h>
 
-#define ITERS 200
+#define ITERS 50
 #define CLAMP(f) (double)(((f) > 1.0) + f * ((f) >= 0.0 && (f) <= 1.0))
 
 static double zoom = 1.0;
@@ -28,20 +28,32 @@ static inline double vec2_dot(const vec2 a, const vec2 b)
     return a.x * b.x + a.y * b.y;
 }
 
-static void pxDraw(unsigned char* pixels, const int width, const int x, const int y, const double n, const double t)
+static void pxDraw(Px* px, const double n, const double t)
 {
-    const double c[3] = {CLAMP(sin(t) * n * 0.8 + 0.2), CLAMP(sin(t * 0.333333) * n), CLAMP(cos(t * 0.7) * n * 0.8 + 0.2)};
-    const unsigned char p[4] = {(unsigned)(c[0] * 255.0f), (unsigned)(c[1] * 255.0f), (unsigned)(c[2] * 255.0f), 255};
-    memcpy(pixels + (y * width + x) * 4, p, 4);
+    const Px p = {
+        (unsigned)(CLAMP(sin(t) * n * 0.8 + 0.2) * 255.0f), 
+        (unsigned)(CLAMP(sin(t * 0.333333) * n) * 255.0f), 
+        (unsigned)(CLAMP(cos(t * 0.7) * n * 0.8 + 0.2) * 255.0f), 
+        255
+    };
+
+    memcpy(px, &p, sizeof(Px));
 }
 
-static void pixelsUpdate(unsigned char* pixels, const int width, const int height, const double posx, const double posy, const double t)
+static void pixelsUpdate(Px* pixbuf, const int width, const int height, 
+        const double posx, const double posy, const double t)
 {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            const vec2 p = {((double)x + posx) / ((double)width * zoom), ((double)y + posy) / ((double)height * zoom)};
+            
+            const vec2 p = {
+                ((double)x + posx) / ((double)width * zoom), 
+                ((double)y + posy) / ((double)height * zoom)
+            };
+
             vec2 z = {0.0, 0.0};
             double n = 0.0;
+            
             for (int i = 0; i < ITERS; ++i) {
                 z = vec2_add(p, vec2_mult(z, z));
                 double dot = vec2_dot(z, z);
@@ -50,7 +62,8 @@ static void pixelsUpdate(unsigned char* pixels, const int width, const int heigh
                     break;
                 }
             }
-            pxDraw(pixels, width, x, y, n, t);
+            
+            pxDraw(pixbuf + width * y + x, n, t);
         }
     }
 }
@@ -65,9 +78,9 @@ int main(const int argc, char** argv)
         height = atoi(argv[2]);
     }
   
-    unsigned char* pixels = spxeStart("Pixel Mandelbrot", 800, 600, width, height);
+    Px* pixbuf = spxeStart("Pixel Mandelbrot", 800, 600, width, height);
     double posx = 0.0, posy = 0.0, t = spxeTime();
-    while (spxeRun(pixels)) { 
+    while (spxeRun(pixbuf)) { 
         double T = spxeTime();
         double dT = (T - t) * 50.0;
         t = T;
@@ -93,7 +106,16 @@ int main(const int argc, char** argv)
         if (spxeKeyDown(X)) {
             zoom -= dT * 0.01 * zoom;
         }
-        pixelsUpdate(pixels, width, height, (posx + posx * zoom) * 0.5, (posy + posy * zoom) * 0.5, t);
+        
+        pixelsUpdate(
+            pixbuf, 
+            width, 
+            height, 
+            (posx + posx * zoom) * 0.5, 
+            (posy + posy * zoom) * 0.5, 
+            t
+        );
     }
-    return spxeEnd(pixels);
+
+    return spxeEnd(pixbuf);
 }

@@ -4,49 +4,49 @@
 #define SPXE_APPLICATION
 #include <spxe.h>
 
-#define pxat(px, width, x, y) (px[(((y) * (width)) + (x)) * 4])
+#define pxat(px, width, x, y) (px[(((y) * (width)) + (x))].r)
 
-static const unsigned char red[] = {255, 0, 0, 255};
-static const unsigned char sand[] = {125, 125, 0, 255};
+static const Px red = {255, 0, 0, 255};
+static const Px sand = {125, 125, 0, 255};
 
-static inline void pxAir(unsigned char* pixels, const int width, const int height, const int x, const int y)
+static inline void pxAir(Px* pixbuf, const int width, const int height, const int x, const int y)
 {
-    unsigned char air[] = {100, 100, 130 + (int)(125.0 * ((float)y / (float)height)), 255};
-    memcpy(pixels + ((y * width) + x) * 4, air, 4);
+    Px air = {100, 100, 130 + (int)(125.0 * ((float)y / (float)height)), 255};
+    memcpy(pixbuf + ((y * width) + x), &air, sizeof(Px));
 }
 
-static void pixelsInit(unsigned char* pixels, const int width, const int height)
+static void pixelsInit(Px* pixbuf, const int width, const int height)
 {
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             if (y < ((height / 3) - (rand() % 40))) {
-                memcpy(pixels + (y * width + x) * 4, sand, 4);
+                memcpy(pixbuf + (y * width + x), &sand, sizeof(Px));
             }
-            else pxAir(pixels, width, height, x, y);
+            else pxAir(pixbuf, width, height, x, y);
         }
     }
 }
 
-static void pixelsUpdate(unsigned char* pixels, const int width, const int height)
+static void pixelsUpdate(Px* pixbuf, const int width, const int height)
 {
-    static unsigned char buf[0xffffff];
+    static Px buf[0xfffff];
 
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
-            const int index = (y * width + x) * 4;
-            if (pixels[index] > 124) {
-                memcpy(pixels + (y * width + x) * 4, sand, 4);
+            const int index = (y * width + x);
+            if (pixbuf[index].r > 124) {
+                memcpy(pixbuf + (y * width + x), &sand, sizeof(Px));
                 if (y > 0) {
-                    if (pxat(pixels, width, x, y - 1) < 125) {
-                        memcpy(buf + ((y - 1) * width + x) * 4, sand, 4);
+                    if (pxat(pixbuf, width, x, y - 1) < 125) {
+                        memcpy(buf + ((y - 1) * width + x), &sand, sizeof(Px));
                         pxAir(buf, width, height, x, y);
                     }
-                    else if (x + 1 < width && pxat(pixels, width, x + 1, y - 1) < 125) {
-                        memcpy(buf + ((y - 1) * width + x + 1) * 4, sand, 4);
+                    else if (x + 1 < width && pxat(pixbuf, width, x + 1, y - 1) < 125) {
+                        memcpy(buf + ((y - 1) * width + x + 1), &sand, sizeof(Px));
                         pxAir(buf, width, height, x, y);
                     }
-                    else if (x > 0 && pxat(pixels, width, x - 1, y - 1) < 125) {
-                        memcpy(buf + ((y - 1) * width + x - 1) * 4, sand, 4);
+                    else if (x > 0 && pxat(pixbuf, width, x - 1, y - 1) < 125) {
+                        memcpy(buf + ((y - 1) * width + x - 1), &sand, sizeof(Px));
                         pxAir(buf, width, height, x, y);
                     }
                 }
@@ -55,7 +55,7 @@ static void pixelsUpdate(unsigned char* pixels, const int width, const int heigh
         }
     }
 
-    memcpy(pixels, buf, width * height * 4);
+    memcpy(pixbuf, buf, width * height * sizeof(Px));
 }
 
 int main(const int argc, char** argv)
@@ -70,27 +70,27 @@ int main(const int argc, char** argv)
         height = atoi(argv[2]);
     }
   
-    unsigned char* pixels = spxeStart("Pixel Sand Simulation", 800, 600, width, height);
+    Px* pixbuf = spxeStart("Pixel Sand Simulation", 800, 600, width, height);
 
     srand(time(NULL));
-    pixelsInit(pixels, width, height);
+    pixelsInit(pixbuf, width, height);
 
-    while (spxeRun(pixels)) {
+    while (spxeRun(pixbuf)) {
         
         if (spxeKeyPressed(ESCAPE) || spxeKeyPressed(Q)) {
             break;
         }
         
         if (spxeKeyPressed(R)) {
-            pixelsInit(pixels, width, height);
+            pixelsInit(pixbuf, width, height);
         }
         
         spxeMousePos(&mousex, &mousey);
-        pixelsUpdate(pixels, width, height);
+        pixelsUpdate(pixbuf, width, height);
         if (spxeMouseDown(LEFT) && mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {
-            memcpy(&pxat(pixels, width, mousex, mousey), red, 4);
+            memcpy(&pxat(pixbuf, width, mousex, mousey), &red, sizeof(Px));
         }
     }
     
-    return spxeEnd(pixels);
+    return spxeEnd(pixbuf);
 }
