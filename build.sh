@@ -8,6 +8,7 @@ inc=-I.
 lib=-lglfw
 
 linux=(
+    -lm
     -lGL
     -lGLEW
 )
