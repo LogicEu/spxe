@@ -5,7 +5,10 @@ std=-std=c99
 wflag=-Wall
 opt=-O2
 inc=-I.
-lib=-lglfw
+
+lib=(
+    -lglfw
+)
 
 linux=(
     -lm
@@ -20,11 +23,11 @@ mac=(
 
 compile() {
     if echo "$OSTYPE" | grep -q "darwin"; then
-        echo "$cc $std $wflag $opt $inc $lib ${mac[*]} $1"
-        $cc $std $wflag $opt $inc $lib ${mac[*]} $1
+        echo "$cc $std $wflag $opt $inc ${lib[*]} ${mac[*]} $1"
+        $cc $std $wflag $opt $inc ${lib[*]} ${mac[*]} $1
     elif echo "$OSTYPE" | grep -q "linux"; then
-        echo "$cc $std $wflag $opt $inc $lib ${linux[*]} $1"
-        $cc $std $wflag $opt $inc $lib ${linux[*]} $1
+        echo "$cc $std $wflag $opt $inc ${lib[*]} ${linux[*]} $1"
+        $cc $std $wflag $opt $inc ${lib[*]} ${linux[*]} $1
     else
         echo "This OS is not supported by this build script yet..."
     fi

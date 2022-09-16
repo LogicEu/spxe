@@ -218,6 +218,9 @@ static void spxeFrame(void)
 
 static void spxeKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
+    (void)window;
+    (void)scancode;
+
     if (key < 128 && !spxe.input.keys[key]) {
         if (mods == GLFW_MOD_CAPS_LOCK || mods == GLFW_MOD_SHIFT || key < 65) {
             spxe.input.memChar = key;
@@ -232,6 +235,7 @@ static void spxeKeyboard(GLFWwindow* window, int key, int scancode, int action, 
 
 static void spxeWindow(GLFWwindow* window, int width, int height)
 {
+    (void)window;
     spxe.winres.width = width;
     spxe.winres.height = height;
     spxeFrame();
@@ -360,7 +364,7 @@ Px* spxeStart(          const char* title,
     
     glfwSetWindowSizeCallback(window, spxeWindow);
     glfwSetKeyCallback(window, spxeKeyboard);
-    glfwSetInputMode(window, GLFW_MOD_CAPS_LOCK, GLFW_TRUE);
+    glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 
     /* OpenGL context and settings */
 #ifndef __APPLE__
