@@ -1,9 +1,8 @@
 # spxe
 
 > Simple pixel engine written in C using OpenGL. It's meant
-> to be extremely simple, lightweight, and easy to use. 
-> The only external dependency on MacOS is GLFW. 
-> On Windows and Linux you also need GLEW.
+> to be extremely simple, lightweight, and easy to use. It
+> is compatible from C89 to C++20.
 
 ## Hello World
 ```C
