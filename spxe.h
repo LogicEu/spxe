@@ -1,3 +1,31 @@
+/*
+
+Copyright (c) 2023 Eugenio Arteaga A.
+
+Permission is hereby granted, free of charge, to any 
+person obtaining a copy of this software and associated 
+documentation files (the "Software"), to deal in the 
+Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute,
+sublicense, and/or sell copies of the Software, and to 
+permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice 
+shall be included in all copies or substantial portions
+of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+*/
+
 #ifndef SIMPLE_PIXEL_ENGINE_H
 #define SIMPLE_PIXEL_ENGINE_H
 
@@ -8,17 +36,16 @@ Simple PiXel Engine
 @Eugenio Arteaga A.
 *******************
 
-Simple pixel engine written in C and OpenGL.
-Meant to be extremely simple, lightweight, and 
-easy to use. By initializing spxe you instantly 
-get a window with a ready to use pixel perfect 
-render context, handing you the control over every 
-pixel that is rendered on the screen.
+Simple pixel engine written in C using OpenGL. It's meant
+to be extremely simple, lightweight, and easy to use. By
+initializing spxe you instantly get a window with a ready
+to use pixel perfect render context, handing you the control
+over every pixel that is rendered on the screen.
 
 As a header only solution, you need to define 
-SPXE_APPLICATION before including spxe.h to access 
-the implementation details. You should only define 
-SPXE_APPLICATION in one translation unit.
+SPXE_APPLICATION before including spxe.h to access the
+implementation details. You should only define 
+SPXE_APPLICATION in a single translation unit.
 
 The only external dependency on MacOS is GLFW. 
 On Windows and Linux you also need GLEW.
@@ -81,8 +108,6 @@ void    spxeMouseVisible(   const int   visible                             );
 /******************
 ****** spxe *******
 Simple PiXel Engine
-*******************
-@Eugenio Arteaga A.
 *******************
 * IMPLEMENTATION  *
 ******************/
