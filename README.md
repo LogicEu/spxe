@@ -36,19 +36,27 @@ int main(void)
 > You should only define SPXE_APPLICATION in a single
 > translation unit.
 
+## dependencies
+*MacOS
+    *GLFW
+
+*Linux and Windows
+    *GLFW
+    *GLEW
+
 ## OS compilation flags
 
-> MacOS
+*MacOS
 ```shell
 -framework OpenGL -lglfw
 ```
 
-> Linux
+*Linux
 ```shell
 -lGL -lGLEW -lglfw
 ```
 
-> Windows
+*Windows
 ```shell
 -lopengl32 -lglfw3dll -lglew32
 ```
