@@ -2,12 +2,14 @@
 
 cc=gcc
 std=-std=c99
-wflag=-Wall
 opt=-O2
 inc=-I.
+lib=-lglfw
 
-lib=(
-    -lglfw
+wflag=(
+    -Wall
+    -Wextra
+    -pedantic
 )
 
 linux=(
@@ -18,19 +20,22 @@ linux=(
 
 mac=(
     -framework OpenGL
-    #-mmacos-version-min=10.10
 )
+
+cc() {
+    echo "$@" && $@
+}
 
 compile() {
     if echo "$OSTYPE" | grep -q "darwin"; then
-        echo "$cc $std $wflag $opt $inc ${lib[*]} ${mac[*]} $1"
-        $cc $std $wflag $opt $inc ${lib[*]} ${mac[*]} $1
+        os=${mac[*]}
     elif echo "$OSTYPE" | grep -q "linux"; then
-        echo "$cc $std $wflag $opt $inc ${lib[*]} ${linux[*]} $1"
-        $cc $std $wflag $opt $inc ${lib[*]} ${linux[*]} $1
+        os=${linux[*]}
     else
         echo "This OS is not supported by this build script yet..."
     fi
+    
+    cc $cc $std ${wflag[*]} $opt $inc $lib ${os[*]} $1
 }
 
 cleanf() {
@@ -39,29 +44,25 @@ cleanf() {
 
 clean() {
     cleanf a.out
-    return 0;
+    return 0
 }
 
 install() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to install" && exit
-
     cp spxe.h /usr/local/include/
-
     echo "Successfully installed $name"
     return 0
 }
 
 uninstall() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to uninstall" && exit
-    
     cleanf /usr/local/include/spxe.h
-    
     echo "Successfully uninstalled $name"
     return 0
 }
 
 fail() {
-    echo "File '$1' was not found." && exit 
+    echo "file '$1' was not found" && exit 
 }
 
 if (( $# < 1 )); then 

@@ -1,17 +1,17 @@
+#define SPXE_APPLICATION
+#include <spxe.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#define SPXE_APPLICATION
-#include <spxe.h>
 
 #define ITERS 50
 #define CLAMP(f) (double)(((f) > 1.0) + f * ((f) >= 0.0 && (f) <= 1.0))
 
-static double zoom = 1.0;
-
 typedef struct vec2 {
     double x, y;
 } vec2;
+
+static double zoom = 1.0;
 
 static inline vec2 vec2_mult(const vec2 a, const vec2 b)
 {
@@ -28,27 +28,24 @@ static inline double vec2_dot(const vec2 a, const vec2 b)
     return a.x * b.x + a.y * b.y;
 }
 
-static void pxDraw(Px* px, const double n, const double t)
+static inline void pxDraw(Px* px, const double n, const double t)
 {
-    const Px p = {
-        (unsigned)(CLAMP(sin(t) * n * 0.8 + 0.2) * 255.0f), 
-        (unsigned)(CLAMP(sin(t * 0.333333) * n) * 255.0f), 
-        (unsigned)(CLAMP(cos(t * 0.7) * n * 0.8 + 0.2) * 255.0f), 
-        255
-    };
-
-    memcpy(px, &p, sizeof(Px));
+    px->r = (unsigned)(CLAMP(sin(t) * n * 0.8 + 0.2) * 255.0);
+    px->g = (unsigned)(CLAMP(sin(t * 0.333333) * n) * 255.0);
+    px->b = (unsigned)(CLAMP(cos(t * 0.7) * n * 0.8 + 0.2) * 255.0);
 }
 
-static void pixelsUpdate(Px* pixbuf, const int width, const int height, 
-        const double posx, const double posy, const double t)
+static void pxUpdate(Px* pixbuf, const int width, const int height, vec2 pos, double t)
 {
+    pos.x = (pos.x + pos.x * zoom) * 0.5;
+    pos.y = (pos.y + pos.y * zoom) * 0.5;
+
     for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+        for (int x = 0; x < width; ++x) {   
             
             const vec2 p = {
-                ((double)x + posx) / ((double)width * zoom), 
-                ((double)y + posy) / ((double)height * zoom)
+                ((double)x + pos.x) / ((double)width * zoom), 
+                ((double)y + pos.y) / ((double)height * zoom)
             };
 
             vec2 z = {0.0, 0.0};
@@ -70,7 +67,11 @@ static void pixelsUpdate(Px* pixbuf, const int width, const int height,
 
 int main(const int argc, char** argv)
 {
-    int width = 64, height = 64; 
+    double t;
+    Px* pixbuf;
+    vec2 pos = {0.0, 0.0};
+    int width = 64, height = 64;
+
     if (argc > 1) {
         width = height = atoi(argv[1]);
     }
@@ -78,27 +79,29 @@ int main(const int argc, char** argv)
         height = atoi(argv[2]);
     }
   
-    Px* pixbuf = spxeStart("Pixel Mandelbrot", 800, 600, width, height);
-    double posx = 0.0, posy = 0.0, t = spxeTime();
+    pixbuf = spxeStart("mandelbrot", 800, 600, width, height);
+    memset(pixbuf, 255, width * height * sizeof(Px));
+    t = spxeTime();
+
     while (spxeRun(pixbuf)) { 
-        double T = spxeTime();
-        double dT = (T - t) * 50.0;
+        double dT, T = spxeTime();
+        dT = (T - t) * 50.0;
         t = T;
 
         if (spxeKeyPressed(ESCAPE) || spxeKeyPressed(Q)) {
             break;
         }
         if (spxeKeyDown(D)) {
-            posx += dT / zoom;
+            pos.x += dT / zoom;
         }
         if (spxeKeyDown(A)) {
-            posx -= dT / zoom;
+            pos.x -= dT / zoom;
         }
         if (spxeKeyDown(W)) {
-            posy += dT / zoom;
+            pos.y += dT / zoom;
         }
         if (spxeKeyDown(S)) {
-            posy -= dT / zoom;
+            pos.y -= dT / zoom;
         }
         if (spxeKeyDown(Z)) {
             zoom += dT * 0.01 * zoom;
@@ -107,14 +110,7 @@ int main(const int argc, char** argv)
             zoom -= dT * 0.01 * zoom;
         }
         
-        pixelsUpdate(
-            pixbuf, 
-            width, 
-            height, 
-            (posx + posx * zoom) * 0.5, 
-            (posy + posy * zoom) * 0.5, 
-            t
-        );
+        pxUpdate(pixbuf, width, height, pos, t);
     }
 
     return spxeEnd(pixbuf);

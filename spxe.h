@@ -1,10 +1,6 @@
 #ifndef SIMPLE_PIXEL_ENGINE_H
 #define SIMPLE_PIXEL_ENGINE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /******************
 ****** spxe *******
 Simple PiXel Engine
@@ -12,30 +8,22 @@ Simple PiXel Engine
 @Eugenio Arteaga A.
 *******************
 
-Simple pixel engine written in C and OpenGL using
-GLFW. Meant to be extremely simple, lightweight,
-and easy to use. By initializing spxe you instantly 
-get an opened a window with a ready to use pixel 
-perfect render context, handing the user control 
-over every pixel that'll be rendered on the screen.
+Simple pixel engine written in C and OpenGL.
+Meant to be extremely simple, lightweight, and 
+easy to use. By initializing spxe you instantly 
+get a window with a ready to use pixel perfect 
+render context, handing you the control over every 
+pixel that is rendered on the screen.
 
 As a header only solution, you need to define 
-SPXE_APPLICATION before including spxe.h to actually
-define the implementation of the engine.
-
-To use spxe.h across multiple compilation units you 
-can include spxe.h in as many files as you need, but 
-you should only define SPXE_APPLICATION in one. It's 
-possible to create spxe.c or spxe.cpp file with only
-these two lines:
-
-#define SPXE_APPLICATION
-#include <spxe.h>
+SPXE_APPLICATION before including spxe.h to access 
+the implementation details. You should only define 
+SPXE_APPLICATION in one translation unit.
 
 The only external dependency on MacOS is GLFW. 
 On Windows and Linux you also need GLEW.
 
-To compile use the following flags:
+************** OS compliation flags ***************
 
 MacOS:      -framework OpenGL -lglfw
 Linux:      -lGL -lGLEW -lglfw
@@ -48,24 +36,13 @@ Windows:    -lopengl32 -lglfw3dll -lglew32
 
 int main(void)
 {
-    const int windowWidth = 800, windowHeight = 600;
-    const int screenWidth = 200, screenHeight = 150;
-    
-    Px* pixbuffer = spxeStart(
-        "Hello World", 
-        windowWidth, 
-        windowHeight, 
-        screenWidth, 
-        screenHeight
-    );
-    
-    while (spxeRun(pixbuffer)) {
+    Px* pixbuf = spxeStart("spxe", 800, 600, 100, 75);
+    while (spxeRun(pixbuf)) {
         if (spxeKeyPressed(ESCAPE)) {
             break;
         }
     }
-    
-    return spxeEnd(pixbuffer);
+    return spxeEnd(pixbuf);
 }
 
 ****************************************************/
@@ -73,21 +50,15 @@ int main(void)
 /*  Simple PiXel Engine  */
 
 typedef struct Px {
-    unsigned char r;
-    unsigned char g;
-    unsigned char b;
-    unsigned char a;
+    unsigned char r, g, b, a;
 } Px;
 
 /* spxe core */
+int     spxeRun(            const Px*   pixbuffer                           );
+int     spxeEnd(            Px*         pixbuffer                           );
 Px*     spxeStart(          const char* title,
                             const int   winwidth,   const int   winheight, 
                             const int   scrwidth,   const int   scrheight   );
-int     spxeRun(            const Px*   pixbuffer                           );
-int     spxeEnd(            Px*         pixbuffer                           );
-Px*     spxePxGet(          const Px*   pixbuffer,  
-                            const int   x,          const int y             );
-void    spxePxSet(          Px*         dst,        const Px src            );
 
 /* time input */
 double  spxeTime(           void                                            );
@@ -104,10 +75,6 @@ int     spxeMouseDown(      const int   button                              );
 int     spxeMousePressed(   const int   button                              );
 int     spxeMouseReleased(  const int   button                              );
 void    spxeMouseVisible(   const int   visible                             );
-
-#ifdef __cplusplus
-}
-#endif
 
 #ifdef SPXE_APPLICATION
 
@@ -140,29 +107,23 @@ Simple PiXel Engine
     #ifdef __APPLE__ 
         #define SPXE_SHADER_HEADER "#version 330 core"
     #else 
-        #define SPXE_SHADER_HEADER "#version 300 es\nprecision mediump float;\n\n"
+        #define SPXE_SHADER_HEADER "#version 300 es\nprecision mediump float;\n"
     #endif
 #endif
 
 #define SPXE_SHADER_VERTEX "                    \
-                                                \
 layout (location = 0) in vec4 vertex;           \
 out vec2 TexCoords;                             \
-                                                \
-void main(void)                                 \
-{                                               \
+void main(void) {                               \
     TexCoords = vertex.zw;                      \
     gl_Position = vec4(vertex.xy, 0.0, 1.0);    \
 }"
 
 #define SPXE_SHADER_FRAGMENT "                  \
-                                                \
 in vec2 TexCoords;                              \
 out vec4 FragColor;                             \
 uniform sampler2D tex;                          \
-                                                \
-void main(void)                                 \
-{                                               \
+void main(void) {                               \
     FragColor = texture(tex, TexCoords);        \
 }"
 
@@ -200,29 +161,36 @@ static struct spxeInfo {
 
 static void spxeFrame(void)
 {
+    int i;
+
+    float vertices[16] = {
+        1.0f,   1.0f,   1.0f,   1.0f,
+        1.0f,  -1.0f,   1.0f,   0.0f,
+        -1.0f, -1.0f,   0.0f,   0.0f,
+        -1.0f,  1.0f,   0.0f,   1.0f
+    };
+
     const float w = (float)spxe.winres.width / (float)spxe.scrres.width;
     const float h = (float)spxe.winres.height / (float)spxe.scrres.height;
     
     spxe.ratio.width = (h < w) ? (h / w) : 1.0f;
     spxe.ratio.height = (w < h) ? (w / h) : 1.0f;
 
-    const float vertices[] = {
-        spxe.ratio.width,    spxe.ratio.height,   1.0f,   1.0f,
-        spxe.ratio.width,    -spxe.ratio.height,  1.0f,   0.0f,
-        -spxe.ratio.width,   -spxe.ratio.height,  0.0f,   0.0f,
-        -spxe.ratio.width,   spxe.ratio.height,   0.0f,   1.0f
-    };
+    for (i = 0; i < 16; i += 4) {
+        vertices[i] *= spxe.ratio.width;
+        vertices[i + 1] *= spxe.ratio.height;
+    }
     
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 }
 
-static void spxeKeyboard(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void spxeKeyboard(GLFWwindow* win, int key, int code, int action, int mod)
 {
-    (void)window;
-    (void)scancode;
+    (void)win;
+    (void)code;
 
     if (key < 128 && !spxe.input.keys[key]) {
-        if (mods == GLFW_MOD_CAPS_LOCK || mods == GLFW_MOD_SHIFT || key < 65) {
+        if (mod == GLFW_MOD_CAPS_LOCK || mod == GLFW_MOD_SHIFT || key < 65) {
             spxe.input.memChar = key;
         }
         else spxe.input.memChar = key + 32;
@@ -288,10 +256,13 @@ char spxeKeyChar(void)
 void spxeMousePos(int* x, int* y)
 {
     double dx, dy;
+    float width, height, hwidth, hheight;
+    
     glfwGetCursorPos(spxe.window, &dx, &dy);
-
-    const float width = (float)spxe.scrres.width, height = (float)spxe.scrres.height;
-    const float hwidth = width * 0.5, hheight = height * 0.5;
+    width = (float)spxe.scrres.width;
+    height = (float)spxe.scrres.height;
+    hwidth = width * 0.5;
+    hheight = height * 0.5;
 
     dx = dx * (width / (float)spxe.winres.width);
     dy = height - dy * (height / (float)spxe.winres.height);
@@ -328,13 +299,25 @@ void spxeMouseVisible(const int visible)
 
 /* spxe core */
 
-Px* spxeStart(          const char* title, 
+Px* spxeStart(          
+    const char* title, 
     const int winwidth, const int winheight, 
     const int scrwidth, const int scrheight)
 {
+    Px* pixbuf;
+    GLFWwindow* window;
+    unsigned int id, vao, ebo, texture;
+    unsigned int shader, vshader, fshader;
+
+    const size_t scrsize = scrwidth * scrheight;
+    const unsigned int indices[] = {
+        0,  1,  3,
+        1,  2,  3 
+    };
+
     /* init glfw */
     if (!glfwInit()) {
-        printf("spxe failed to initiate glfw.\n");
+        fprintf(stderr, "spxe failed to initiate glfw.\n");
         return NULL;
     }
 
@@ -350,9 +333,9 @@ Px* spxeStart(          const char* title,
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 #endif
 
-    GLFWwindow* window = glfwCreateWindow(winwidth, winheight, title, NULL, NULL);
+    window = glfwCreateWindow(winwidth, winheight, title, NULL, NULL);
     if (!window) {
-        printf("spxe failed to open glfw window.\n");
+        fprintf(stderr, "spxe failed to open glfw window.\n");
         glfwTerminate();
         return NULL;
     }
@@ -361,7 +344,6 @@ Px* spxeStart(          const char* title,
     glfwSwapInterval(1);
 
     glfwSetWindowSizeLimits(window, scrwidth, scrheight, GLFW_DONT_CARE, GLFW_DONT_CARE);
-    
     glfwSetWindowSizeCallback(window, spxeWindow);
     glfwSetKeyCallback(window, spxeKeyboard);
     glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
@@ -370,7 +352,7 @@ Px* spxeStart(          const char* title,
 #ifndef __APPLE__
     glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
-        printf("spxe failed to initiate glew.\n");
+        fprintf(stderr, "spxe failed to initiate glew.\n");
         return NULL;
     }
 #endif
@@ -381,14 +363,11 @@ Px* spxeStart(          const char* title,
     glDepthFunc(GL_LESS);
     
     /* allocate pixel framebuffer */
-    const size_t len = scrwidth * scrheight * sizeof(Px);
-    Px* pixbuffer = malloc(len);
-    if (!pixbuffer) {
-        printf("spxe failed to allocate pixel framebuffer.\n");
+    pixbuf = (Px*)calloc(scrsize, sizeof(Px));
+    if (!pixbuf) {
+        fprintf(stderr, "spxe failed to allocate pixel framebuffer.\n");
         return NULL;
     }
-
-    memset(pixbuffer, 155, len);
 
     /* set global information */
     spxe.window = window;
@@ -398,32 +377,26 @@ Px* spxeStart(          const char* title,
     spxe.scrres.height = scrheight;
     
     /* compile and link shaders */
-    unsigned int shader = glCreateProgram();
+    shader = glCreateProgram();
     
-    unsigned int vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vertexShader, NULL);
-    glCompileShader(vertex);
+    vshader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vshader, 1, &vertexShader, NULL);
+    glCompileShader(vshader);
 
-    unsigned int fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fragmentShader, NULL);
-    glCompileShader(fragment);
+    fshader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fshader, 1, &fragmentShader, NULL);
+    glCompileShader(fshader);
 
-    glAttachShader(shader, vertex);
-    glAttachShader(shader, fragment);
+    glAttachShader(shader, vshader);
+    glAttachShader(shader, fshader);
     glLinkProgram(shader);
     
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+    glDeleteShader(vshader);
+    glDeleteShader(fshader);
     
     glUseProgram(shader);
 
-    /* create shader buffers */
-    const unsigned int indices[] = {
-        0,  1,  3,
-        1,  2,  3 
-    };
-
-    unsigned int id, vao, ebo;
+    /* create vertex buffers */
     glGenVertexArrays(1, &id);
     glBindVertexArray(id);
 
@@ -437,11 +410,9 @@ Px* spxeStart(          const char* title,
     
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
     glBindBuffer(GL_ARRAY_BUFFER, vao);
 
-    /* generate render texture */
-    unsigned int texture;
+    /* create render texture (framebuffer) */
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
     
@@ -452,60 +423,42 @@ Px* spxeStart(          const char* title,
     
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 
-        0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuffer
+        0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuf
     );
 
     glGenerateMipmap(GL_TEXTURE_2D);
-
-    return pixbuffer;
+    return pixbuf;
 }
 
-int spxeRun(const Px* pixbuffer)
+int spxeRun(const Px* pixbuf)
 {
     glClear(GL_COLOR_BUFFER_BIT);
-    
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 
-        0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuffer
+        0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuf
     );
 
     glGenerateMipmap(GL_TEXTURE_2D);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    
     glfwSwapBuffers(spxe.window);
     glfwPollEvents();
     
-    return !glfwWindowShouldClose(spxe.window) && !!pixbuffer;
+    return !glfwWindowShouldClose(spxe.window);
 }
 
-int spxeEnd(Px* pixbuffer)
+int spxeEnd(Px* pixbuf)
 {
     glfwDestroyWindow(spxe.window);
     glfwTerminate();
-    
-    if (!pixbuffer) {
+    if (!pixbuf) {
         return EXIT_FAILURE;
     }
     
-    free(pixbuffer);
+    free(pixbuf);
     return EXIT_SUCCESS;
 }
 
-Px* spxePxGet(const Px* pixbuffer, const int x, const int y)
-{
-    return (Px*)(size_t)(pixbuffer + (y * spxe.scrres.width + x));
-}
-
-void spxePxSet(Px* dest, const Px src)
-{
-    memcpy(dest, &src, sizeof(Px));
-}
-
-#else
-
-#include <GLFW/glfw3.h>
-
-#endif // SPXE_APPLICATION
+#endif /* SPXE_APPLICATION */
 
 #define spxeKeyDown(key) spxeKeyDown(GLFW_KEY_ ## key)
 #define spxeKeyPressed(key) spxeKeyPressed(GLFW_KEY_ ## key)
@@ -514,4 +467,4 @@ void spxePxSet(Px* dest, const Px src)
 #define spxeMousePressed(key) spxeMousePressed(GLFW_MOUSE_BUTTON_ ## key)
 #define spxeMouseReleased(key) spxeMouseReleased(GLFW_MOUSE_BUTTON_ ## key)
 
-#endif // SIMPLE_PIXEL_ENGINE_H
+#endif /* SIMPLE_PIXEL_ENGINE_H */

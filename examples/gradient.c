@@ -1,23 +1,28 @@
 #define SPXE_APPLICATION
 #include <spxe.h>
 
-int main(void)
-{
-    const int width = 256, height = 256;
-    Px* pixbuf = spxeStart("Pixel Gradient", 800, 600, width, height);
+#define SIZE 256
+#define WIDTH SIZE
+#define HEIGHT SIZE
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
-            Px px = {x, 0, y, 255};
-            spxePxSet(spxePxGet(pixbuf, x, y), px);
+static void spxeDrawGradient(Px* pixbuf)
+{
+    for (int y = 0; y < HEIGHT; ++y) {
+        for (int x = 0; x < WIDTH; ++x) {
+            Px px = {x, 0, y, SIZE - 1};
+            pixbuf[y * WIDTH + x] = px;
         }
     }
+}
 
+int main(void)
+{
+    Px* pixbuf = spxeStart("gradient", 800, 600, WIDTH, HEIGHT);
+    spxeDrawGradient(pixbuf);
     while (spxeRun(pixbuf)) {
         if(spxeKeyPressed(ESCAPE)) {
             break;
         }
     }
-
     return spxeEnd(pixbuf);
 }
