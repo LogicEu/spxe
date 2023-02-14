@@ -37,26 +37,23 @@ int main(void)
 > translation unit.
 
 ## dependencies
-*MacOS
-    *GLFW
 
-*Linux and Windows
-    *GLFW
-    *GLEW
+* [GLFW](https://github.com/glfw/glfw)
+* [GLEW](https://github.com/nigels-com/glew) (only on Linux and Windows)
 
 ## OS compilation flags
 
-*MacOS
+* MacOS
 ```shell
 -framework OpenGL -lglfw
 ```
 
-*Linux
+* Linux
 ```shell
 -lGL -lGLEW -lglfw
 ```
 
-*Windows
+* Windows
 ```shell
 -lopengl32 -lglfw3dll -lglew32
 ```
