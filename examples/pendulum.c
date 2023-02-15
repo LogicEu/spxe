@@ -4,7 +4,6 @@
 #include <string.h>
 #include <math.h>
 
-#define SIGN(n) ((n) > 0 ? 1 : -1)
 #define ABS(n) ((n) > 0 ? (n) : -(n))
 
 typedef struct vec2 {
@@ -30,13 +29,12 @@ static void pxPlotLine(bmp4 bmp, ivec2 p0, ivec2 p1, Px color)
     int error = dx + dy;
     
     while (1) {
-        memcpy(bmp.pixbuf + p0.y * bmp.width + p0.x, &color, sizeof(Px));
+        bmp.pixbuf[p0.y * bmp.width + p0.x] = color;
         if (p0.x == p1.x && p0.y == p1.y) {
             break;
         }
 
         int e2 = error * 2;
-        
         if (e2 >= dy) {
             if (p0.x == p1.x) {
                 break;
@@ -77,8 +75,7 @@ int main(const int argc, const char** argv)
     vec2 xy = {(float)p.x, (float)p.y};
 
     const ivec2 idif = {p.x - center.x, p.y - center.y};
-    const float dist = sqrtf(idif.x * idif.x + idif.y * idif.y);
-    const float invDist = 1.0F / dist;
+    const float invDist = 1.0F / sqrtf(idif.x * idif.x + idif.y * idif.y);
     float v = 0.0F, t = spxeTime();
 
     while (spxeRun(pixbuf)) {
@@ -101,7 +98,11 @@ int main(const int argc, const char** argv)
 
         memset(pixbuf, 155, size);
         if (p.x >= 0 && p.y >= 0 && p.x < width && p.y < height) {
-            ivec2 d = {(int)(xy.x - cross.x * v * 0.25F), (int)(xy.y + cross.y * v * 0.25F)};
+            ivec2 d = {
+                (int)(xy.x - cross.x * v * 0.25F),
+                (int)(xy.y + cross.y * v * 0.25F)
+            };
+
             pxPlotLine(framebuffer, center, p, red);
             pxPlotLine(framebuffer, p, d, green);
         }
