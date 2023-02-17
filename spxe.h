@@ -371,7 +371,7 @@ Px* spxeStart(
     glfwSetWindowSizeLimits(window, scrwidth, scrheight, GLFW_DONT_CARE, GLFW_DONT_CARE);
     glfwSetWindowSizeCallback(window, spxeWindow);
     glfwSetKeyCallback(window, spxeKeyboard);
-    glfwSetInputMode(window, GLFW_LOCK_KEY_MODS, GLFW_TRUE);
+    glfwSetInputMode(window, GLFW_MOD_CAPS_LOCK, GLFW_TRUE);
 
     /* OpenGL context and settings */
 #ifndef __APPLE__
