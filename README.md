@@ -22,7 +22,7 @@ int main(void)
 }
 
 ```
-## header only
+## Header-Only
 
 > As a header only solution, you need to define 
 > SPXE_APPLICATION before including spxe.h to access the
@@ -36,12 +36,12 @@ int main(void)
 > You should only define SPXE_APPLICATION in a single
 > translation unit.
 
-## dependencies
+## Dependencies
 
 * [GLFW](https://github.com/glfw/glfw)
 * [GLEW](https://github.com/nigels-com/glew) (only on Linux and Windows)
 
-## OS compilation flags
+## Compilation
 
 * MacOS
 ```shell
