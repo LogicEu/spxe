@@ -87,6 +87,9 @@ Px*     spxeStart(          const char* title,
                             const int   winwidth,   const int   winheight, 
                             const int   scrwidth,   const int   scrheight   );
 
+void    spxeScreenSize(     int*        widthptr,   int*        heightptr   );
+void    spxeWindowSize(     int*        widthptr,   int*        heightptr   );
+
 /* time input */
 double  spxeTime(           void                                            );
 
@@ -97,7 +100,7 @@ int     spxeKeyReleased(    const int   key                                 );
 char    spxeKeyChar(        void                                            );
 
 /* mouse input */
-void    spxeMousePos(       int*        x,          int*        y           );
+void    spxeMousePos(       int*        xptr,       int*        yptr        );
 int     spxeMouseDown(      const int   button                              );        
 int     spxeMousePressed(   const int   button                              );
 int     spxeMouseReleased(  const int   button                              );
@@ -232,6 +235,20 @@ static void spxeWindow(GLFWwindow* window, int width, int height)
     spxe.winres.width = width;
     spxe.winres.height = height;
     spxeFrame();
+}
+
+/* window and screen size getters */
+
+void spxeWindowSize(int* width, int* height)
+{
+    *width = spxe.winres.width;
+    *height = spxe.winres.height;
+}
+
+void spxeScreenSize(int* width, int* height)
+{
+    *width = spxe.scrres.width;
+    *height = spxe.scrres.height;
 }
 
 /* time input */
