@@ -501,12 +501,12 @@ int spxeEnd(Px* pixbuf)
 }
 
 #endif /* SPXE_APPLICATION */
-
+#ifdef _glfw3_h_
 #define spxeKeyDown(key) spxeKeyDown(GLFW_KEY_ ## key)
 #define spxeKeyPressed(key) spxeKeyPressed(GLFW_KEY_ ## key)
 #define spxeKeyReleased(key) spxeKeyReleased(GLFW_KEY_ ## key)
 #define spxeMouseDown(key) spxeMouseDown(GLFW_MOUSE_BUTTON_ ## key)
 #define spxeMousePressed(key) spxeMousePressed(GLFW_MOUSE_BUTTON_ ## key)
 #define spxeMouseReleased(key) spxeMouseReleased(GLFW_MOUSE_BUTTON_ ## key)
-
+#endif /* _glfw3_h_ */
 #endif /* SIMPLE_PIXEL_ENGINE_H */
