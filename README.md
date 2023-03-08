@@ -143,21 +143,21 @@ double spxeTime(void);
 > Returns time from the moment spxe was initialized in seconds.
 
 ### Access
+
 ```C
-/* Access pixel at position (x=2, y=1) and set it to be red /*
+    /* Access pixel at position (x=2, y=1) and set it to be red */
  
-const int width = 40;
-const int height = 30;
+    const int width = 40;
+    const int height = 30;
 
-int x = 2;
-int y = 1;
+    int x = 2;
+    int y = 1;
 
-Px* pixbuf = spxeStart("example", 800, 600, width, height);
-const Px red = {255, 0, 0, 255};
-pixbuf[ y * width + x] = red;
+    Px* pixbuf = spxeStart("example", 800, 600, width, height);
+    const Px red = {255, 0, 0, 255};
+    pixbuf[ y * width + x] = red;
 
-/* Render with spxeRun(pixbuf); ... */
-
+    /* Render with spxeRun(pixbuf); ... */
 ```
 > You can access pixel channels independently easily. The examples in this repo
 > show various ways of plotting and drawing with the engine.
