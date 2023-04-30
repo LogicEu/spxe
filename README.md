@@ -146,18 +146,22 @@ double spxeTime(void);
 
 ```C
     /* Access pixel at position (x=2, y=1) and set it to be red */
+
+    #define WINDOW_WIDTH 800
+    #define WINDOW_HEIGHT 600
  
-    const int width = 40;
-    const int height = 30;
+    const int width = 80; 
+    const int height = 60;
+    
+    Px* pixbuf = spxeStart("example", WINDOW_WIDTH, WINDOW_HEIGHT, width, height);
 
     int x = 2;
     int y = 1;
 
-    Px* pixbuf = spxeStart("example", 800, 600, width, height);
     const Px red = {255, 0, 0, 255};
-    pixbuf[ y * width + x] = red;
+    pixbuf[ y * width + x ] = red;
 
     /* Render with spxeRun(pixbuf); ... */
 ```
-> You can access pixel channels independently easily. The examples in this repo
-> show various ways of plotting and drawing with the engine.
+> You can access pixel channels independently and easily. The examples folder in this repo
+> shows various ways of plotting and drawing with the engine.
