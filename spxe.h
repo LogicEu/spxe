@@ -133,7 +133,7 @@ Simple PiXel Engine
 
 #ifndef SPXE_SHADER_HEADER
     #ifdef __APPLE__ 
-        #define SPXE_SHADER_HEADER "#version 330 core"
+        #define SPXE_SHADER_HEADER "#version 330 core\n"
     #else 
         #define SPXE_SHADER_HEADER "#version 300 es\nprecision mediump float;\n"
     #endif
@@ -468,7 +468,6 @@ Px* spxeStart(
         0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuf
     );
 
-    glGenerateMipmap(GL_TEXTURE_2D);
     return pixbuf;
 }
 
@@ -480,11 +479,9 @@ int spxeRun(const Px* pixbuf)
         0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuf
     );
 
-    glGenerateMipmap(GL_TEXTURE_2D);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(spxe.window);
     glfwPollEvents();
-    
     return !glfwWindowShouldClose(spxe.window);
 }
 
