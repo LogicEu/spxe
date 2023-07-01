@@ -32,7 +32,7 @@ compile() {
     elif echo "$OSTYPE" | grep -q "linux"; then
         os=${linux[*]}
     else
-        echo "This OS is not supported by this build script yet..."
+        echo "This OS is not supported by this build script yet..." && exit
     fi
     
     cc $cc $std ${wflag[*]} $opt $inc $lib ${os[*]} $1
