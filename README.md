@@ -43,7 +43,7 @@ translation unit.
 
 ## Compilation
 
-These examples show basic a compilation command. You may need to use some -I and
+These examples show a basic compilation command. You may need to use some -I and
 -L flags depending on how you included your files and where in your system you 
 keep the required libraries.
 
