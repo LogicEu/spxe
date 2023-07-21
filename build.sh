@@ -36,7 +36,7 @@ compile() {
     elif echo "$OSTYPE" | grep -q "linux"; then
         os=${linux[*]}
     else
-        echo "This OS is not supported by this build script yet..." && exit
+        echo "This OS is not supported by this build script yet..."
     fi
     
     cmd $cc $1 -o $exe $std $opt ${wflag[*]} $inc $lib ${os[*]}
@@ -54,14 +54,14 @@ clean() {
 install() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to install" && exit
     cmd cp $header $installpath
-    echo "Successfully installed $name"
+    echo "Successfully installed $header"
     return 0
 }
 
 uninstall() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to uninstall" && exit
     cleanf $installpath/$header
-    echo "Successfully uninstalled $name"
+    echo "Successfully uninstalled $header"
     return 0
 }
 
@@ -70,9 +70,12 @@ fail() {
 }
 
 usage() {
-    echo "Enter a file to compile with $header"
-    echo "Use 'install' to install spxe.h in $installpath"
-    echo "Use 'clean' to remove local builds"
+    echo "usage:"
+    echo -e "<source>\t: Compile source file with $header"
+    echo -e "run <source>\t: Compile source file and run program passing all extra arguments"
+    echo -e "clean\t\t: Clean compiled executables"
+    echo -e "install\t\t: Install $header in $installpath (run with sudo)"
+    echo -e "uninstall\t: Unnstall $header from $installpath (run with sudo)"
 }
 
 (( $# < 1 )) && usage && exit
