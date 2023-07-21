@@ -1,5 +1,9 @@
 #!/bin/bash
 
+exe=a.out
+header=spxe.h
+installpath=/usr/local/include
+
 cc=gcc
 std=-std=c99
 opt=-O2
@@ -22,7 +26,7 @@ mac=(
     -framework OpenGL
 )
 
-cc() {
+cmd() {
     echo "$@" && $@
 }
 
@@ -35,42 +39,43 @@ compile() {
         echo "This OS is not supported by this build script yet..." && exit
     fi
     
-    cc $cc $std ${wflag[*]} $opt $inc $lib ${os[*]} $1
+    cmd $cc $1 -o $exe $std $opt ${wflag[*]} $inc $lib ${os[*]}
 }
 
 cleanf() {
-    [ -f $1 ] && rm $1 && echo "deleted $1"
+    [ -f $1 ] && cmd rm -f $1
 }
 
 clean() {
-    cleanf a.out
+    cleanf $exe
     return 0
 }
 
 install() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to install" && exit
-    cp spxe.h /usr/local/include/
+    cmd cp $header $installpath
     echo "Successfully installed $name"
     return 0
 }
 
 uninstall() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to uninstall" && exit
-    cleanf /usr/local/include/spxe.h
+    cleanf $installpath/$header
     echo "Successfully uninstalled $name"
     return 0
 }
 
 fail() {
-    echo "file '$1' was not found" && exit 
+    echo "file '$1' was not found"
 }
 
-if (( $# < 1 )); then 
-    echo "Enter a file to compile with spxe.h"
-    echo "Use 'install' to install spxe.h in /usr/local/"
+usage() {
+    echo "Enter a file to compile with $header"
+    echo "Use 'install' to install spxe.h in $installpath"
     echo "Use 'clean' to remove local builds"
-    exit
-fi
+}
+
+(( $# < 1 )) && usage && exit
 
 case "$1" in
     "clean")
@@ -80,8 +85,7 @@ case "$1" in
     "uninstall")
         uninstall;;
     "run")
-        shift
-        [ -f $1 ] && compile $1 && ./a.out || fail $1;;
+        shift && [ -f $1 ] && compile $1 && shift && ./$exe $@ || fail $1;;
     *)
         [ -f $1 ] && compile $1 || fail $1;;
 esac
