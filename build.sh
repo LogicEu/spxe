@@ -17,7 +17,6 @@ wflag=(
 )
 
 linux=(
-    -lm
     -lGL
     -lGLEW
 )
@@ -46,11 +45,6 @@ cleanf() {
     [ -f $1 ] && cmd rm -f $1
 }
 
-clean() {
-    cleanf $exe
-    return 0
-}
-
 install() {
     [ "$EUID" -ne 0 ] && echo "Run with 'sudo' to install" && exit
     cmd cp $header $installpath
@@ -66,14 +60,14 @@ uninstall() {
 }
 
 fail() {
-    echo "file '$1' was not found"
+    echo "file '$1' not found"
 }
 
 usage() {
-    echo "usage:"
-    echo -e "<source>\t: Compile source file with $header"
-    echo -e "run <source>\t: Compile source file and run program passing all extra arguments"
-    echo -e "clean\t\t: Clean compiled executables"
+    echo "$0 usage:"
+    echo -e "<source>\t: Compile <source> file with $header"
+    echo -e "run <source>\t: Compile <source> file and run program passing all extra arguments"
+    echo -e "clean\t\t: Delete compiled executable"
     echo -e "install\t\t: Install $header in $installpath (run with sudo)"
     echo -e "uninstall\t: Unnstall $header from $installpath (run with sudo)"
 }
@@ -82,7 +76,7 @@ usage() {
 
 case "$1" in
     "clean")
-        clean;;
+        cleanf $exe;;
     "install")
         install;;
     "uninstall")
