@@ -45,7 +45,7 @@ translation unit.
 
 These examples show a basic compilation command. You may need to use some -I and
 -L flags depending on how you included your files and where in your system you 
-keep the required libraries.
+keep the linking libraries.
 
 * MacOS
 ```shell
@@ -60,6 +60,53 @@ gcc source.c -o program -lGL -lGLEW -lglfw
 * Windows
 ```shell
 cl source.c -o program.exe -lopengl32 -lglfw3dll -lglew32
+```
+
+## Build Scripts
+
+You can find two build scripts in this repository. They do essentially the
+same; provide a basic compilation example and an easy way to compile source
+code and the examples given. They work very similarly and have the same
+options.
+
+* Compile default target file example/hello.c
+
+```shell
+make
+```
+
+* Compile example given by command line argument
+
+```shell
+make example/mandelbro.c
+./build.sh example/mandelbrot.c
+```
+
+* Delete compiled executable
+
+```shell
+make clean
+./build.sh clean
+```
+
+* Install spxe.h header file in /usr/local/include
+
+```shell
+sudo make install
+sudo ./build.sh install
+```
+
+* Uninstall spxe.h header file from /usr/local/include
+
+```shell
+sudo make uninstall
+sudo ./build.sh uninstall
+```
+
+* Print usage information and available command line arguments
+
+```shell
+./build.sh help
 ```
 
 ## API
