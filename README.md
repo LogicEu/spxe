@@ -66,44 +66,39 @@ cl source.c -o program.exe -lopengl32 -lglfw3dll -lglew32
 
 You can find two build scripts in this repository. They do essentially the
 same; provide a basic compilation example and an easy way to compile source
-code and the examples given. They work very similarly and have the same
-options.
+code and the examples given. They work very similarly and provide basically
+the same options. These are some of the things you can do with them:
 
-* Compile default target file example/hello.c
-
-```shell
-make
-```
-
-* Compile example given by command line argument
+Compile a specific example passed as command line argument:
 
 ```shell
-make example/mandelbro.c
+make example/mandelbrot.c
 ./build.sh example/mandelbrot.c
 ```
 
-* Delete compiled executable
+The resulting executable will be called a.out by default. To delete the
+compiled executable do:
 
 ```shell
 make clean
 ./build.sh clean
 ```
 
-* Install spxe.h header file in /usr/local/include
+Install spxe.h header file in /usr/local/include:
 
 ```shell
 sudo make install
 sudo ./build.sh install
 ```
 
-* Uninstall spxe.h header file from /usr/local/include
+Uninstall spxe.h header file from /usr/local/include:
 
 ```shell
 sudo make uninstall
 sudo ./build.sh uninstall
 ```
 
-* Print usage information and available command line arguments
+Print usage information and available commands:
 
 ```shell
 ./build.sh help
