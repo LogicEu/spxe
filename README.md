@@ -65,9 +65,10 @@ cl source.c -o program.exe -lopengl32 -lglfw3dll -lglew32
 ## Build Scripts
 
 You can find two build scripts in this repository. They do essentially the
-same; provide a basic compilation example and an easy way to compile source
-code and the examples given. They work very similarly and provide basically
-the same options. These are some of the things you can do with them:
+same; provide a basic compilation command giving an easy way to compile the
+examples, and an install command to make spxe.h easily available in your system.
+They work very similarly and provide the same options. These are some of the
+things you can do with them:
 
 Compile a specific example passed as command line argument:
 

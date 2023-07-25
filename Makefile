@@ -24,7 +24,7 @@ CFLAGS=$(STD) $(OPT) $(WFLAGS) $(INC) $(LIB) $(OPNGL)
 
 $(EXE): $(SRC)
 
-$(EXAMPLES)/*.c: $(HEADER)
+$(EXAMPLES)/%.c: $(HEADER)
 	$(CC) $@ -o $(EXE) $(CFLAGS)
 
 clean:
