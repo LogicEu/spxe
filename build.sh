@@ -5,7 +5,7 @@ header=spxe.h
 installpath=/usr/local/include
 
 cc=gcc
-std=-std=c99
+std=-std=c89
 opt=-O2
 inc=-I.
 lib=-lglfw
@@ -17,6 +17,7 @@ wflag=(
 )
 
 linux=(
+    -lm     # used by examples/pendulum and examples/mandelbrot.c
     -lGL
     -lGLEW
 )

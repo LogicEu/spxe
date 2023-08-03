@@ -7,9 +7,12 @@
 
 static void spxeDrawGradient(Px* pixbuf)
 {
-    for (int y = 0; y < HEIGHT; ++y) {
-        for (int x = 0; x < WIDTH; ++x) {
-            Px px = {x, 0, y, SIZE - 1};
+    int x, y;
+    for (y = 0; y < HEIGHT; ++y) {
+        for (x = 0; x < WIDTH; ++x) {
+            Px px = {0, 0, 0, SIZE - 1};
+            px.r = x;
+            px.b = y;
             pixbuf[y * WIDTH + x] = px;
         }
     }
@@ -26,3 +29,4 @@ int main(void)
     }
     return spxeEnd(pixbuf);
 }
+

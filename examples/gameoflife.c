@@ -11,17 +11,18 @@ static const Px white = {255, 255, 255, 255};
 
 static void pxInit(Px* pixbuf, const size_t size)
 {
-    for (size_t i = 0; i < size; ++i) {
+    size_t i;
+    for (i = 0; i < size; ++i) {
         memcpy(pixbuf + i, rand() % 2 ? &white : &black, sizeof(Px));
     }
 }
 
 static void pxUpdate(Px* pixbuf, Px* buf, const int width, const int height)
 {
-    int index = 0;
+    int x, y, index = 0;
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {      
+    for (y = 0; y < height; ++y) {
+        for (x = 0; x < width; ++x) {      
 
             int count = 0;
 
@@ -52,7 +53,8 @@ int main(const int argc, char** argv)
     int mousex, mousey, width = 320, height = 240;
     
     if (argc > 1) {
-        width = height = atoi(argv[1]);
+        width = atoi(argv[1]);
+        height = width;
     }
     if (argc > 2) {
         height = atoi(argv[2]);
@@ -81,3 +83,4 @@ int main(const int argc, char** argv)
     free(buf);
     return spxeEnd(pixbuf);
 }
+

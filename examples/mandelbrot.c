@@ -13,22 +13,35 @@ typedef struct vec2 {
 
 static double zoom = 1.0;
 
-static inline vec2 vec2_mult(const vec2 a, const vec2 b)
+static double dlog2(double x)
 {
-    return (vec2){a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x};
+    return log(x) / log(2);
 }
 
-static inline vec2 vec2_add(const vec2 a, const vec2 b)
+static vec2 vec2_create(double x, double y)
 {
-    return (vec2){a.x + b.x, a.y + b.y};
+    vec2 p;
+    p.x = x;
+    p.y = y;
+    return p;
 }
 
-static inline double vec2_dot(const vec2 a, const vec2 b)
+static vec2 vec2_mult(const vec2 a, const vec2 b)
+{
+    return vec2_create(a.x * b.x - a.y * b.y, a.x * b.y + a.y * b.x);
+}
+
+static vec2 vec2_add(const vec2 a, const vec2 b)
+{
+    return vec2_create(a.x + b.x, a.y + b.y);
+}
+
+static double vec2_dot(const vec2 a, const vec2 b)
 {
     return a.x * b.x + a.y * b.y;
 }
 
-static inline void pxDraw(Px* px, const double n, const double t)
+static void pxDraw(Px* px, const double n, const double t)
 {
     px->r = (unsigned)(CLAMP(sin(t) * n * 0.8 + 0.2) * 255.0);
     px->g = (unsigned)(CLAMP(sin(t * 0.333333) * n) * 255.0);
@@ -37,25 +50,27 @@ static inline void pxDraw(Px* px, const double n, const double t)
 
 static void pxUpdate(Px* pixbuf, const int width, const int height, vec2 pos, double t)
 {
+    int i, x, y;
+
     pos.x = (pos.x + pos.x * zoom) * 0.5;
     pos.y = (pos.y + pos.y * zoom) * 0.5;
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {   
+    for (y = 0; y < height; ++y) {
+        for (x = 0; x < width; ++x) {   
             
-            const vec2 p = {
+            double dot, n = 0.0;
+            vec2 z = {0.0, 0.0};
+            
+            const vec2 p = vec2_create(
                 ((double)x + pos.x) / ((double)width * zoom), 
                 ((double)y + pos.y) / ((double)height * zoom)
-            };
+            );
 
-            vec2 z = {0.0, 0.0};
-            double n = 0.0;
-            
-            for (int i = 0; i < ITERS; ++i) {
+            for (i = 0; i < ITERS; ++i) {
                 z = vec2_add(p, vec2_mult(z, z));
-                double dot = vec2_dot(z, z);
+                dot = vec2_dot(z, z);
                 if (dot > 45678.0) {
-                    n = ((double)i - (log2(dot)) + 4.0) / (double)ITERS;
+                    n = ((double)i - (dlog2(dot)) + 4.0) / (double)ITERS;
                     break;
                 }
             }
@@ -73,7 +88,8 @@ int main(const int argc, char** argv)
     int width = 64, height = 64;
 
     if (argc > 1) {
-        width = height = atoi(argv[1]);
+        width = atoi(argv[1]);
+        height = width;
     }
     if (argc > 2) {
         height = atoi(argv[2]);

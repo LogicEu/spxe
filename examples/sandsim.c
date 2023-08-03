@@ -8,16 +8,18 @@
 
 static const Px sand = {125, 125, 0, 255};
 
-static inline void pxAir(Px* pixbuf, int width, int height, int x, int y)
+static void pxAir(Px* pixbuf, int width, int height, int x, int y)
 {
-    Px air = {100, 100, 130 + (int)(125.0 * ((float)y / (float)height)), 255};
+    Px air = {100, 100, 130, 255};
+    air.b += (uint8_t)(int)(125.0 * ((float)y / (float)height));
     memcpy(pixbuf + y * width + x, &air, sizeof(Px));
 }
 
 static void pxInit(Px* pixbuf, const int width, const int height)
 {
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    int x, y;
+    for (y = 0; y < height; ++y) {
+        for (x = 0; x < width; ++x) {
             if (y < ((height / 3) - (rand() % 40))) {
                 memcpy(pixbuf + (y * width + x), &sand, sizeof(Px));
             }
@@ -28,10 +30,10 @@ static void pxInit(Px* pixbuf, const int width, const int height)
 
 static void pxUpdate(Px* pixbuf, Px* buf, const int width, const int height)
 {
-    int index = 0;
+    int x, y, index = 0;
     
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (y = 0; y < height; ++y) {
+        for (x = 0; x < width; ++x) {
             
             if (pixbuf[index].r > 124) {
                 memcpy(pixbuf + index, &sand, sizeof(Px)); 
@@ -66,7 +68,8 @@ int main(const int argc, char** argv)
     int mousex, mousey, width = 160, height = 120;
     
     if (argc > 1) {
-        width = height = atoi(argv[1]);
+        width = atoi(argv[1]);
+        height = width;
     }
     if (argc > 2) {
         height = atoi(argv[2]);
@@ -95,3 +98,4 @@ int main(const int argc, char** argv)
     free(buf);
     return spxeEnd(pixbuf);
 }
+

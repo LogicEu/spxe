@@ -19,6 +19,22 @@ typedef struct bmp4 {
     int width, height;
 } bmp4;
 
+static vec2 vec2_create(float x, float y)
+{
+    vec2 p;
+    p.x = x;
+    p.y = y;
+    return p;
+}
+
+static ivec2 ivec2_create(int x, int y)
+{
+    ivec2 p;
+    p.x = x;
+    p.y = y;
+    return p;
+}
+
 static void pxPlotLine(bmp4 bmp, ivec2 p0, ivec2 p1, Px color)
 {
     const int dx = ABS(p1.x - p0.x);
@@ -26,7 +42,7 @@ static void pxPlotLine(bmp4 bmp, ivec2 p0, ivec2 p1, Px color)
     const int sx = p0.x < p1.x ? 1 : -1;
     const int sy = p0.y < p1.y ? 1 : -1;
     
-    int error = dx + dy;
+    int e2, error = dx + dy;
     
     while (1) {
         bmp.pixbuf[p0.y * bmp.width + p0.x] = color;
@@ -34,7 +50,7 @@ static void pxPlotLine(bmp4 bmp, ivec2 p0, ivec2 p1, Px color)
             break;
         }
 
-        int e2 = error * 2;
+        e2 = error * 2;
         if (e2 >= dy) {
             if (p0.x == p1.x) {
                 break;
@@ -57,29 +73,35 @@ static void pxPlotLine(bmp4 bmp, ivec2 p0, ivec2 p1, Px color)
 
 int main(const int argc, const char** argv)
 {
-    int width = 200, height = 150;
+    const Px red = {255, 0, 0, 255}, green = {0, 255, 0, 255};
+    
+    size_t size;
+    vec2 xy, dif, cross;
+    ivec2 p, center, idif;
+    bmp4 fb = {NULL, 200, 150};
+    float invDist, dT, T, t, v = 0.0f;
+
     if (argc > 1) {
-        width = height = atoi(argv[1]);
+        fb.width = atoi(argv[1]);
+        fb.height = fb.width;
     }
     if (argc > 2) {
-        height = atoi(argv[2]);
+        fb.height = atoi(argv[2]);
     }
 
-    Px* pixbuf = spxeStart("Pendulum", 800, 600, width, height);
-    bmp4 framebuffer = {pixbuf, width, height};
+    fb.pixbuf = spxeStart("Pendulum", 800, 600, fb.width, fb.height);
     
-    const Px red = {255, 0, 0, 255}, green = {0, 255, 0, 255};
-    const size_t size = width * height * sizeof(Px);
-    const ivec2 center = {width / 2, height / 2};
-    ivec2 p = {center.x + width / 8, center.y};
-    vec2 xy = {(float)p.x, (float)p.y};
+    size = fb.width * fb.height * sizeof(Px);
+    center = ivec2_create(fb.width / 2, fb.height / 2);
+    p = ivec2_create(center.x + fb.width / 8, center.y);
+    xy = vec2_create((float)p.x, (float)p.y);
 
-    const ivec2 idif = {p.x - center.x, p.y - center.y};
-    const float invDist = 1.0F / sqrtf(idif.x * idif.x + idif.y * idif.y);
-    float v = 0.0F, t = spxeTime();
+    idif = ivec2_create(p.x - center.x, p.y - center.y);
+    invDist = 1.0F / sqrt(idif.x * idif.x + idif.y * idif.y);
+    t = spxeTime();
 
-    while (spxeRun(pixbuf)) {
-        double dT, T = spxeTime();
+    while (spxeRun(fb.pixbuf)) {
+        T = spxeTime();
         dT = (T - t);
         t = T;
 
@@ -87,8 +109,8 @@ int main(const int argc, const char** argv)
             break;
         }
 
-        vec2 dif = {(float)(p.x - center.x), (float)(p.y - center.y)};
-        vec2 cross = {dif.y * invDist, dif.x * invDist};
+        dif = vec2_create((float)(p.x - center.x), (float)(p.y - center.y));
+        cross = vec2_create(dif.y * invDist, dif.x * invDist);
         
         v -= cross.y;
         xy.x -= cross.x * v * dT;
@@ -96,17 +118,17 @@ int main(const int argc, const char** argv)
         p.x = (int)xy.x;
         p.y = (int)xy.y;
 
-        memset(pixbuf, 155, size);
-        if (p.x >= 0 && p.y >= 0 && p.x < width && p.y < height) {
-            ivec2 d = {
+        memset(fb.pixbuf, 155, size);
+        if (p.x >= 0 && p.y >= 0 && p.x < fb.width && p.y < fb.height) {
+            ivec2 d = ivec2_create(
                 (int)(xy.x - cross.x * v * 0.25F),
                 (int)(xy.y + cross.y * v * 0.25F)
-            };
+            );
 
-            pxPlotLine(framebuffer, center, p, red);
-            pxPlotLine(framebuffer, p, d, green);
+            pxPlotLine(fb, center, p, red);
+            pxPlotLine(fb, p, d, green);
         }
     }
 
-    return spxeEnd(pixbuf);
+    return spxeEnd(fb.pixbuf);
 }
