@@ -110,7 +110,7 @@ Print usage information and available commands:
 ```C
 typedef struct Px {
     unsigned char r, g, b, a;
-};
+} Px;
 ```
 Main and only tyepedefed structure used by the engine. The simple pixel 
 engine handles only 4 channel RGBA buffers. You are encouraged to cast this
