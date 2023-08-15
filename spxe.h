@@ -76,9 +76,14 @@ int main(void)
 
 /*  Simple PiXel Engine  */
 
+#ifndef PX_TYPE_DEFINED
+#define PX_TYPE_DEFINED
+
 typedef struct Px {
     unsigned char r, g, b, a;
 } Px;
+
+#endif /* PX_TYPE_DEFINED */
 
 /* spxe core */
 int     spxeRun(            const Px*   pixbuffer                           );
