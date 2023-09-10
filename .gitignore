@@ -1,1 +1,5 @@
 a.out
+spxe.o
+libspxe.a
+libspxe.so
+libspxe.dylib
