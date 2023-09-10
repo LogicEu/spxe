@@ -237,6 +237,9 @@ static void spxeKeyboard(GLFWwindow* win, int key, int code, int action, int mod
 static void spxeWindow(GLFWwindow* window, int width, int height)
 {
     (void)window;
+#ifndef __APPLE__
+    glViewport(0, 0, width, height);
+#endif /* __APPLE__ */
     spxe.winres.width = width;
     spxe.winres.height = height;
     spxeFrame();
