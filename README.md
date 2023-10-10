@@ -22,6 +22,24 @@ int main(void)
 }
 
 ```
+
+## Plotting
+
+By initializing spxe you are given a 8-bit RGBA pixel buffer in a row-major order 
+where the coordinate (0, 0) corresponds to the top left pixel of the image. At each
+frame you render from the CPU side by directly accessing and modifying the values of 
+the pixel buffer giving you fast and direct control over every pixel in the screen. 
+This is an example on how you can plot a pixel at position (x, y) to red.
+
+```C
+
+Px red = {255, 0, 0, 255};
+pixbuf[y * width + x] = red;
+
+```
+
+Where ```width``` is the fourth argument given to ```spxeStart()```. 
+
 ## Header-Only
 
 As a header only solution, you need to define 
@@ -64,13 +82,22 @@ cl source.c -o program.exe -lopengl32 -lglfw3dll -lglew32
 
 ## Build Scripts
 
-You can find two build scripts in this repository. They do essentially the
-same; provide a basic compilation command giving an easy way to compile the
-examples, and an install command to make spxe.h easily available in your system.
-They work very similarly and provide the same options. These are some of the
-things you can do with them:
+You can find two build scripts in this repository, one uses make and the other
+one bash. They do essentially the same; provide a basic compilation command
+giving a fast way to compile compile the examples and an easy install command to
+make spxe available in your system. Both scripts very similarly and provide 
+the same options. These are some of the things you can do with them:
 
-Compile a specific example passed as command line argument:
+Compile spxe as a shared or static library, using the 'shared' or 'static'
+command line options. A library named libspxe.* will be created at the root of
+the repository. The file extension will depend on the system.
+
+```shell
+make shared
+./build.sh static
+```
+
+Compile a specific example by including spxe.h as a header only solution:
 
 ```shell
 make example/mandelbrot.c
@@ -78,7 +105,7 @@ make example/mandelbrot.c
 ```
 
 The resulting executable will be called a.out by default. To delete the
-compiled executable do:
+compiled binaries do:
 
 ```shell
 make clean

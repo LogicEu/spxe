@@ -13,7 +13,6 @@ WFLAGS=-Wall -Wextra -pedantic
 LIBS=-lglfw
 
 EXAMPLES=examples
-SRC=$(EXAMPLES)/hello.c
 SCRIPT=build.sh
 
 OS=$(shell uname -s)
@@ -29,12 +28,7 @@ endif
 
 CFLAGS=$(STD) $(OPT) $(WFLAGS)
 
-$(EXE): $(SRC)
-
-$(EXAMPLES)/%.c: $(HEADER)
-	$(CC) $(CFLAGS) -I. $(LIBS) $@ -o $(EXE) 
-
-.PHONY: shared static clean install uninstall
+.PHONY: shared static clean install uninstall force
 
 all: shared static
 
@@ -50,6 +44,9 @@ $(LIB).a: $(OBJ)
 
 $(OBJ): $(HEADER)
 	$(CC) $(CFLAGS) -x c -DSPXE_APPLICATION -c $^ -o $@ 
+
+$(EXAMPLES)/%.c: force
+	$(CC) $(CFLAGS) -I. $(LIBS) $@ -o $(EXE) 
 
 clean:
 	$(RM) $(EXE)
