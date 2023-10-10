@@ -80,7 +80,7 @@ static void pxUpdate(Px* pixbuf, const int width, const int height, vec2 pos, do
     }
 }
 
-int main(const int argc, char** argv)
+int main(const int argc, const char** argv)
 {
     double t;
     Px* pixbuf;
@@ -89,10 +89,7 @@ int main(const int argc, char** argv)
 
     if (argc > 1) {
         width = atoi(argv[1]);
-        height = width;
-    }
-    if (argc > 2) {
-        height = atoi(argv[2]);
+        height = argc > 2 ? atoi(argv[2]) : width;
     }
   
     pixbuf = spxeStart("mandelbrot", 800, 600, width, height);
@@ -131,3 +128,4 @@ int main(const int argc, char** argv)
 
     return spxeEnd(pixbuf);
 }
+

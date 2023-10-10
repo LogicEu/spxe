@@ -41,7 +41,6 @@ static void pxPlotLine(bmp4 bmp, ivec2 p0, ivec2 p1, Px color)
     const int dy = -ABS(p1.y - p0.y);
     const int sx = p0.x < p1.x ? 1 : -1;
     const int sy = p0.y < p1.y ? 1 : -1;
-    
     int e2, error = dx + dy;
     
     while (1) {
@@ -83,14 +82,10 @@ int main(const int argc, const char** argv)
 
     if (argc > 1) {
         fb.width = atoi(argv[1]);
-        fb.height = fb.width;
-    }
-    if (argc > 2) {
-        fb.height = atoi(argv[2]);
+        fb.height = argc > 2 ? atoi(argv[2]) : fb.width;
     }
 
     fb.pixbuf = spxeStart("Pendulum", 800, 600, fb.width, fb.height);
-    
     size = fb.width * fb.height * sizeof(Px);
     center = ivec2_create(fb.width / 2, fb.height / 2);
     p = ivec2_create(center.x + fb.width / 8, center.y);
@@ -132,3 +127,4 @@ int main(const int argc, const char** argv)
 
     return spxeEnd(fb.pixbuf);
 }
+

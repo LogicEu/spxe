@@ -19,13 +19,10 @@ static void pxInit(Px* pixbuf, const size_t size)
 
 static void pxUpdate(Px* pixbuf, Px* buf, const int width, const int height)
 {
-    int x, y, index = 0;
-
+    int x, y, count, index = 0;
     for (y = 0; y < height; ++y) {
-        for (x = 0; x < width; ++x) {      
-
-            int count = 0;
-
+        for (x = 0; x < width; ++x, ++index) {
+            count = 0;
             count += (x + 1 < width) && pxAt(pixbuf, width, x + 1, y);
             count += (x + 1 < width) && (y > 0) && pxAt(pixbuf, width, x + 1, y - 1);
             count += (y > 0) && pxAt(pixbuf, width, x, y - 1);
@@ -33,13 +30,12 @@ static void pxUpdate(Px* pixbuf, Px* buf, const int width, const int height)
             count += (x > 0) && pxAt(pixbuf, width, x - 1, y);
             count += (x > 0) && (y + 1 < height) && pxAt(pixbuf, width, x - 1, y + 1);
             count += (y + 1 < height) && pxAt(pixbuf, width, x, y + 1);
-            count += (x + 1 < width) && (y + 1 < height) && pxAt(pixbuf, width, x + 1, y + 1);
+            count += (x + 1 < width) && (y + 1 < height) && 
+                        pxAt(pixbuf, width, x + 1, y + 1);
 
-            if (pixbuf[index].r)
-                memcpy(buf + index, (count == 2 || count == 3) ? &white : &black, sizeof(Px));
-            else memcpy(buf + index, (count == 3) ? &white : &black, sizeof(Px));
-
-            ++index;
+            buf[index] = pixbuf[index].r ?
+                        (count == 2 || count == 3 ? white : black) : 
+                        (count == 3 ? white : black);
         }
     }
 
@@ -54,10 +50,7 @@ int main(const int argc, char** argv)
     
     if (argc > 1) {
         width = atoi(argv[1]);
-        height = width;
-    }
-    if (argc > 2) {
-        height = atoi(argv[2]);
+        height = argc > 2 ? atoi(argv[2]) : width;
     }
 
     srand(time(NULL));
@@ -76,7 +69,7 @@ int main(const int argc, char** argv)
         
         pxUpdate(pixbuf, buf, width, height);
         if (mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {
-            memcpy(pixbuf + mousey * width + mousex, &red, sizeof(Px));
+            pixbuf[mousey * width + mousex] = red;
         }
     }
     

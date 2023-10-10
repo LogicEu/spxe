@@ -4,64 +4,53 @@
 #include <string.h>
 #include <time.h>
 
-#define pxAt(px, w, x, y) (px[(((y) * (w)) + (x))].r)
-
 static const Px sand = {125, 125, 0, 255};
 
-static void pxAir(Px* pixbuf, int width, int height, int x, int y)
+static Px pxAir(const int height, int y)
 {
     Px air = {100, 100, 130, 255};
     air.b += (uint8_t)(int)(125.0 * ((float)y / (float)height));
-    memcpy(pixbuf + y * width + x, &air, sizeof(Px));
+    return air;
 }
 
 static void pxInit(Px* pixbuf, const int width, const int height)
 {
-    int x, y;
+    int x, y, index = 0;
     for (y = 0; y < height; ++y) {
-        for (x = 0; x < width; ++x) {
-            if (y < ((height / 3) - (rand() % 40))) {
-                memcpy(pixbuf + (y * width + x), &sand, sizeof(Px));
-            }
-            else pxAir(pixbuf, width, height, x, y);
+        for (x = 0; x < width; ++x, ++index) {
+            pixbuf[index] = y < height / 3 - (rand() % 40) ? sand: pxAir(height, y);
         }
     }
 }
 
 static void pxUpdate(Px* pixbuf, Px* buf, const int width, const int height)
 {
-    int x, y, index = 0;
-    
+    int x, y, dy, index = 0;
     for (y = 0; y < height; ++y) {
-        for (x = 0; x < width; ++x) {
-            
+        for (x = 0; x < width; ++x, ++index) { 
             if (pixbuf[index].r > 124) {
-                memcpy(pixbuf + index, &sand, sizeof(Px)); 
                 if (y > 0) {
-                    if (pxAt(pixbuf, width, x, y - 1) < 125) {
-                        memcpy(buf + ((y - 1) * width + x), &sand, sizeof(Px));
-                        pxAir(buf, width, height, x, y);
-                    }
-                    else if (x + 1 < width && pxAt(pixbuf, width, x + 1, y - 1) < 125) {
-                        memcpy(buf + ((y - 1) * width + x + 1), &sand, sizeof(Px));
-                        pxAir(buf, width, height, x, y);
-                    }
-                    else if (x > 0 && pxAt(pixbuf, width, x - 1, y - 1) < 125) {
-                        memcpy(buf + ((y - 1) * width + x - 1), &sand, sizeof(Px));
-                        pxAir(buf, width, height, x, y);
+                    dy = (y - 1) * width;
+                    if (pixbuf[dy + x].r < 125) {
+                        buf[dy + x] = sand;
+                        buf[index] = pxAir(height, y);
+                    } else if (x + 1 < width && pixbuf[dy + x + 1].r < 125) {
+                        buf[dy + x + 1] = sand;
+                        buf[index] = pxAir(height, y);
+                    } else if (x > 0 && pixbuf[dy + x - 1].r < 125) {
+                        buf[dy + x - 1] = sand;
+                        buf[index] = pxAir(height, y);
                     }
                 }
             }
-            else pxAir(buf, width, height, x, y);
-
-            ++index;
+            else buf[index] = pxAir(height, y);
         }
     }
 
     memcpy(pixbuf, buf, width * height * sizeof(Px));
 }
 
-int main(const int argc, char** argv)
+int main(const int argc, const char** argv)
 {
     Px* pixbuf, *buf;
     const Px red = {255, 0, 0, 255};
@@ -69,10 +58,7 @@ int main(const int argc, char** argv)
     
     if (argc > 1) {
         width = atoi(argv[1]);
-        height = width;
-    }
-    if (argc > 2) {
-        height = atoi(argv[2]);
+        height = argc > 2 ? atoi(argv[2]) : width;
     }
 
     srand(time(NULL));
@@ -90,8 +76,9 @@ int main(const int argc, char** argv)
         }
         
         pxUpdate(pixbuf, buf, width, height);
-        if (spxeMouseDown(LEFT) && mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {
-            memcpy(&pxAt(pixbuf, width, mousex, mousey), &red, sizeof(Px));
+        if (spxeMouseDown(LEFT) && 
+            mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {
+            pixbuf[mousey * width + mousex] = red;
         }
     }
     
