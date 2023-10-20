@@ -86,14 +86,17 @@ typedef struct Px {
 #endif /* PX_TYPE_DEFINED */
 
 /* spxe core */
-int     spxeRun(            const Px*   pixbuffer                           );
-int     spxeEnd(            Px*         pixbuffer                           );
+int     spxeStep(           void                                            );
+int     spxeRun(            const Px*   pixbuf                              );
+void    spxeRender(         const Px*   pixbuf                              );
+int     spxeEnd(            Px*         pixbuf                              );
 Px*     spxeStart(          const char* title,
                             const int   winwidth,   const int   winheight, 
                             const int   scrwidth,   const int   scrheight   );
 
 void    spxeScreenSize(     int*        widthptr,   int*        heightptr   );
 void    spxeWindowSize(     int*        widthptr,   int*        heightptr   );
+void    spxeBackgroundColor(const Px    px                                  );
 
 /* time input */
 double  spxeTime(           void                                            );
@@ -136,6 +139,13 @@ Simple PiXel Engine
 
 /* spxe shader strings */
 
+#define _SPXE_TOK2STR(s) #s
+#define SPXE_TOK2STR(s) _SPXE_TOK2STR(s)
+
+#ifndef SPXE_SHADER_LAYOUT_LOCATION
+    #define SPXE_SHADER_LAYOUT_LOCATION 0
+#endif
+
 #ifndef SPXE_SHADER_HEADER
     #ifdef __APPLE__ 
         #define SPXE_SHADER_HEADER "#version 330 core\n"
@@ -144,21 +154,23 @@ Simple PiXel Engine
     #endif
 #endif
 
-#define SPXE_SHADER_VERTEX "                    \
-layout (location = 0) in vec4 vertex;           \
-out vec2 TexCoords;                             \
-void main(void) {                               \
-    TexCoords = vertex.zw;                      \
-    gl_Position = vec4(vertex.xy, 0.0, 1.0);    \
-}"
+#define SPXE_SHADER_LAYOUT_STR SPXE_TOK2STR(SPXE_SHADER_LAYOUT_LOCATION)
 
-#define SPXE_SHADER_FRAGMENT "                  \
-in vec2 TexCoords;                              \
-out vec4 FragColor;                             \
-uniform sampler2D tex;                          \
-void main(void) {                               \
-    FragColor = texture(tex, TexCoords);        \
-}"
+#define SPXE_SHADER_VERTEX "layout (location = " SPXE_SHADER_LAYOUT_STR ")" \
+"in vec4 vertCoord;\n"                          \
+"out vec2 TexCoords;\n"                         \
+"void main(void) {\n"                           \
+"    TexCoords = vertCoord.zw;\n"               \
+"    gl_Position = vec4(vertCoord.xy,0.,1.); \n"\
+"}\n"
+
+#define SPXE_SHADER_FRAGMENT                    \
+"in vec2 TexCoords;\n"                          \
+"out vec4 FragColor;\n"                         \
+"uniform sampler2D tex;\n"                      \
+"void main(void) {\n"                           \
+"    FragColor = texture(tex, TexCoords);\n"    \
+"}\n"
 
 static const char* vertexShader = SPXE_SHADER_HEADER SPXE_SHADER_VERTEX;
 static const char* fragmentShader = SPXE_SHADER_HEADER SPXE_SHADER_FRAGMENT;
@@ -182,13 +194,7 @@ static struct spxeInfo {
         int keys[1024];
         int pressedKeys[1024];
     } input;
-} spxe = {
-    NULL, 
-    {400, 300}, 
-    {800, 600},
-    {1.0, 1.0},
-    {GLFW_RELEASE, 1, 0, {0}, {0}} 
-};
+} spxe = {NULL, {400, 300}, {800, 600}, {1.0, 1.0}, {GLFW_RELEASE, 1, 0, {0}, {0}}};
 
 /* implementation only static functions */
 
@@ -350,8 +356,7 @@ void spxeMouseVisible(const int visible)
 /* spxe core */
 
 Px* spxeStart(          
-    const char* title, 
-    const int winwidth, const int winheight, 
+    const char* title,  const int winwidth, const int winheight, 
     const int scrwidth, const int scrheight)
 {
     Px* pixbuf;
@@ -458,8 +463,8 @@ Px* spxeStart(
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(SPXE_SHADER_LAYOUT_LOCATION);
+    glVertexAttribPointer(SPXE_SHADER_LAYOUT_LOCATION, 4, GL_FLOAT, GL_FALSE, 0, 0);
     glBindBuffer(GL_ARRAY_BUFFER, vao);
 
     /* create render texture (framebuffer) */
@@ -479,30 +484,45 @@ Px* spxeStart(
     return pixbuf;
 }
 
-int spxeRun(const Px* pixbuf)
+void spxeBackgroundColor(const Px c)
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    const float n = 1.0F / 255.0F;
+    glClearColor((float)c.r * n, (float)c.g * n, (float)c.b * n, (float)c.a * n);
+}
+
+void spxeRender(const Px* pixbuf)
+{
     glTexImage2D(
         GL_TEXTURE_2D, 0, GL_RGBA, spxe.scrres.width, spxe.scrres.height, 
         0, GL_RGBA, GL_UNSIGNED_BYTE, pixbuf
     );
 
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    glfwSwapBuffers(spxe.window);
+}
+
+int spxeStep(void)
+{ 
     glfwPollEvents();
+    glfwSwapBuffers(spxe.window);
+    glClear(GL_COLOR_BUFFER_BIT);
     return !glfwWindowShouldClose(spxe.window);
+}
+
+int spxeRun(const Px* pixbuf)
+{
+    spxeRender(pixbuf);
+    return spxeStep();
 }
 
 int spxeEnd(Px* pixbuf)
 {
-    glfwDestroyWindow(spxe.window);
     glfwTerminate();
-    if (!pixbuf) {
-        return EXIT_FAILURE;
+    if (pixbuf) {
+        free(pixbuf);
+        return EXIT_SUCCESS;
     }
-    
-    free(pixbuf);
-    return EXIT_SUCCESS;
+
+    return EXIT_FAILURE;
 }
 
 #endif /* SPXE_APPLICATION */
