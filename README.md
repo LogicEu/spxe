@@ -249,7 +249,7 @@ double spxeTime(void);
 Returns time from the moment spxe was initialized in seconds.
 
 
-### Flags
+## Flags
 
 The engine is not entirely comatible with any other OpenGL code simultaneosly, as it
 does not give direct handles for textures and vertex buffers. Nevertheless, it
@@ -264,7 +264,7 @@ create framebuffers and even multi-pass post-processing shading effects.
 Define ```SPXE_SHADER_LAYOUT_LOCATION``` with the value that most
 suits your code, preventing spxe from interfering with your own shaders.
 
-### Example
+## Example
 
 This program opens up a 800 x 600 window in a 10:1 pixel scale.
 Each frame it clears the pixel buffer to white, then plots the
