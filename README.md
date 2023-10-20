@@ -2,7 +2,7 @@
 
 Simple pixel engine written in C using OpenGL. It's meant
 to be extremely simple, lightweight, and easy to use. It
-is compatible from C89 to C++20.
+is compatible from C89 to C++20 as a header only solution.
 
 ## Hello World
 ```C
@@ -12,7 +12,7 @@ is compatible from C89 to C++20.
 
 int main(void)
 {
-    Px* pixbuf = spxeStart("spxe", 800, 600, 100, 75);
+    Px* pixbuf = spxeStart("title", 800, 600, 100, 75);
     while (spxeRun(pixbuf)) {
         if (spxeKeyPressed(ESCAPE)) {
             break;
@@ -22,6 +22,20 @@ int main(void)
 }
 
 ```
+
+## Header-Only
+
+As a header only solution, you need to define 
+SPXE_APPLICATION before including spxe.h to access the
+implementation details. 
+
+```C
+#define SPXE_APPLICATION
+#include <spxe.h>
+```
+
+You should only define SPXE_APPLICATION in a single
+translation unit.
 
 ## Plotting
 
@@ -39,20 +53,6 @@ pixbuf[y * width + x] = red;
 ```
 
 Where ```width``` is the fourth argument given to ```spxeStart()```. 
-
-## Header-Only
-
-As a header only solution, you need to define 
-SPXE_APPLICATION before including spxe.h to access the
-implementation details. 
-
-```C
-#define SPXE_APPLICATION
-#include <spxe.h>
-```
-
-You should only define SPXE_APPLICATION in a single
-translation unit.
 
 ## Dependencies
 
@@ -151,20 +151,45 @@ Px* spxeStart(
 Creates a window with title, width and height specified by the first three
 arguments. The fourth and fifth arguments represent the width and height of 
 the pixel buffer that is allocated and returned to be rendered. The pixel 
-buffer is a contiguous array of type Px in row-major order.
+buffer is a contiguous array of type Px in row-major order. The size in memory
+of the returned pixel buffer is exactly the width by the height by the size of
+the ```Px``` struct.
+
+```C
+int spxeStep(void);
+```
+This function flushes the previous frame from the screen, swaps the rendering
+buffers, polls for inputs, and checks if the rendering window is still opened. It
+returns zero if the window was closed, other wise it returns a non-zero value.
+Unless using ```spxeRun()```, this functions should be called once every frame.
+
+```C
+void spxeRender(const Px* pixbuf);
+```
+Renders the pixel buffer passed as argument to the screen. This function can be
+called more than once each frame and you can pass any texture that has the
+same resolution and size in memory as the one returned by ```spxeStart()```.
+Otherwise, it results in undefined behaviour. Rendering a pixel with an alpha value
+of zero will result in the pixel having the color of the background or what was
+already rendered on that pixel. An alpha value of 255 will result in the exact
+linear RGB color of the rendered pixel. All values in between are automatically
+interpolated.
 
 ```C
 int spxeRun(const Px* pixbuf);
 ```
-Flushes previous frame from the screen and renders the pixel buffer passed as
-argument on the opened window. If the window was closed this function returns
-zero, otherwise, it returns a non-zero value.
+This function is exactly the same as calling ```spxeStep()``` and
+```spxeRender()```. It clears the screen from the previous frame, renders the
+pixel buffer passed as argument and checks for input. It returns a non-zero
+value if the rendering window is still opened, otherwise it returns zero. This
+function does all what's necesary to run and render with spxe and it's most useful
+as the check to the main rendering loop.
 
 ```C
 int spxeEnd(Px* pixbuf);
 ```
-Deallocates the pixel buffer and closes the render window along with the glfw
-library.
+Deallocates the pixel buffer and closes the render window along with OpenGL
+libraries.
 
 ```C
 void spxeScreenSize(int* width, int* height);
@@ -173,6 +198,13 @@ void spxeWindowSize(int* width, int* height);
 These functions return the width and height of the initialized screen and
 window respectively, inside the first and second pointers passed to the
 function. Expects valid integers as arguments.
+
+```C
+void spxeBackgroundColor(Px color);
+```
+Sets the color of the background to the color specified by the passed argument.
+It has permanent state, so it does not need to be called every frame, but it
+can be changed at any time. The background color is set to black by default.
 
 ```C
 int spxeKeyDown(const int key);
@@ -215,6 +247,22 @@ visible if you pass any other value.
 double spxeTime(void);
 ```
 Returns time from the moment spxe was initialized in seconds.
+
+
+### Flags
+
+The engine is not entirely comatible with any other OpenGL code simultaneosly, as it
+does not give direct handles for textures and vertex buffers. Nevertheless, it
+provides a flag to give the user control over spxe's default shader layout
+location, so it can coexist with other quad-like shaders, making it posible to
+create framebuffers and even multi-pass post-processing shading effects.
+
+```
+#define SPXE_SHADER_LAYOUT_LOCATION N
+```
+
+Define ```SPXE_SHADER_LAYOUT_LOCATION``` with the value that most
+suits your code, preventing spxe from interfering with your own shaders.
 
 ### Example
 

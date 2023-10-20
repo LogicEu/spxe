@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    Px* pixbuf = spxeStart("spxe", 800, 600, 100, 75);
+    Px* pixbuf = spxeStart("title", 800, 600, 100, 75);
     while (spxeRun(pixbuf)) {
         if (spxeKeyPressed(ESCAPE)) {
             break;
