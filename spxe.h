@@ -191,8 +191,8 @@ static struct spxeInfo {
         int mouseState;
         int queuedChar;
         int memChar;
-        int keys[1024];
-        int pressedKeys[1024];
+        unsigned char keys[1024];
+        unsigned char pressedKeys[1024];
     } input;
 } spxe = {NULL, {400, 300}, {800, 600}, {1.0, 1.0}, {GLFW_RELEASE, 1, 0, {0}, {0}}};
 
