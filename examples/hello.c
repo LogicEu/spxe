@@ -5,7 +5,7 @@ int main(void)
 {
     Px* pixbuf = spxeStart("title", 800, 600, 100, 75);
     while (spxeRun(pixbuf)) {
-        if (spxeKeyPressed(ESCAPE)) {
+        if (spxeKeyPressed(KEY_ESCAPE)) {
             break;
         }
     }

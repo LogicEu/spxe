@@ -88,6 +88,7 @@ usage() {
     echo -e "<source>\t: compile <source> file including $header"
     echo -e "shared\t\t: build $name as a shared library: $lib.$suffix"
     echo -e "static\t\t: build $name as a static library: $lib.a"
+    echo -e "test\t\t: test compilation of all example files"
     echo -e "all\t\t: build $name as shared and static libraries"
     echo -e "help\t\t: print usage information and available commands"
     echo -e "clean\t\t: delete local builds and executables"
@@ -102,6 +103,8 @@ case "$1" in
         object && shared;;
     "static")
         object && static;;
+    "test")
+        for f in examples/*.c; do compile $f; done;;
     "all")
         object && shared && static;;
     "help")

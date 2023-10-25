@@ -14,7 +14,7 @@ int main(void)
 {
     Px* pixbuf = spxeStart("title", 800, 600, 100, 75);
     while (spxeRun(pixbuf)) {
-        if (spxeKeyPressed(ESCAPE)) {
+        if (spxeKeyPressed(KEY_ESCAPE)) {
             break;
         }
     }
@@ -215,12 +215,15 @@ int spxeMousePressed(const int button);
 int spxeMouseReleased(const int button);
 ```
 These keyboard and mouse input functions return 0 or 1 depending on the state 
-of the key or button passed as argument. In the translation unit where spxe 
-is being defined with the SPXE_APPLICATION macro, you can use shortcuts 
-like ESCAPE, SPACE, SHIFT, LEFT_CONTROL, or LEFT and RIGHT for the mouse and
-keyboard. Even just single capitalized characters work as character keys.
-If you are calling these functions from elsewhere you need to pass in
-[GLFW](https://github.com/glfw/glfw) key codes by including glfw3.h.
+of the key or button passed as argument. The values to be tested are defined by
+macros in spxe.h with the syntax KEY_NAME and MOUSE_NAME where NAME is the
+identifier of the key or button. For mouse input, the values are
+```MOUSE_LEFT```, ```MOUSE_RIGHT``` and ```MOUSE_MIDDLE```. Some keyboard
+examples are ```KEY_ESCAPE```, ```KEY_SPACE```, ```KEY_CONTROL```,
+```KEY_LEFT```, ```KEY_RIGHT```, and for character keys ```KEY_W```.
+mouse and keyboard. These macro definitions have the same identifiers and
+values as glfw input codes, they are essentially shorter and less verbose
+versions.
 
 ```C
 char spxeKeyChar(void);
@@ -297,7 +300,7 @@ int main(void)
 
     while (spxeRun(pixbuf)) {
         spxeMousePos(&mouseX, &mouseY);
-        if (spxeKeyPressed(ESCAPE)) {
+        if (spxeKeyPressed(KEY_ESCAPE)) {
             break;
         }
 

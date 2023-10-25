@@ -68,15 +68,15 @@ int main(const int argc, const char** argv)
 
     while (spxeRun(pixbuf)) {
         spxeMousePos(&mousex, &mousey);
-        if (spxeKeyPressed(ESCAPE) || spxeKeyPressed(Q)) {
+        if (spxeKeyPressed(KEY_ESCAPE) || spxeKeyPressed(KEY_Q)) {
             break;
         }
-        if (spxeKeyPressed(R)) {
+        if (spxeKeyPressed(KEY_R)) {
             pxInit(pixbuf, width, height);
         }
         
         pxUpdate(pixbuf, buf, width, height);
-        if (spxeMouseDown(LEFT) && 
+        if (spxeMouseDown(MOUSE_LEFT) && 
             mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {
             pixbuf[mousey * width + mousex] = red;
         }

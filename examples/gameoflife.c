@@ -60,10 +60,10 @@ int main(const int argc, char** argv)
 
     while (spxeRun(pixbuf)) {
         spxeMousePos(&mousex, &mousey);
-        if (spxeKeyPressed(ESCAPE) || spxeKeyPressed(Q)) {
+        if (spxeKeyPressed(KEY_ESCAPE) || spxeKeyPressed(KEY_Q)) {
             break;
         }
-        if (spxeKeyPressed(R)) {
+        if (spxeKeyPressed(KEY_R)) {
             pxInit(pixbuf, width * height);
         }
         

@@ -27,7 +27,7 @@ int main(void)
 
     while (spxeRun(pixbuf)) {
         spxeMousePos(&mouseX, &mouseY);
-        if (spxeKeyPressed(ESCAPE)) {
+        if (spxeKeyPressed(KEY_ESCAPE)) {
             break;
         }
 

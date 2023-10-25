@@ -100,7 +100,7 @@ int main(const int argc, const char** argv)
         dT = (T - t);
         t = T;
 
-        if (spxeKeyPressed(ESCAPE)) {
+        if (spxeKeyPressed(KEY_ESCAPE)) {
             break;
         }
 

@@ -101,25 +101,25 @@ int main(const int argc, const char** argv)
         dT = (T - t) * 50.0;
         t = T;
 
-        if (spxeKeyPressed(ESCAPE) || spxeKeyPressed(Q)) {
+        if (spxeKeyPressed(KEY_ESCAPE) || spxeKeyPressed(KEY_Q)) {
             break;
         }
-        if (spxeKeyDown(D)) {
+        if (spxeKeyDown(KEY_D)) {
             pos.x += dT / zoom;
         }
-        if (spxeKeyDown(A)) {
+        if (spxeKeyDown(KEY_A)) {
             pos.x -= dT / zoom;
         }
-        if (spxeKeyDown(W)) {
+        if (spxeKeyDown(KEY_W)) {
             pos.y += dT / zoom;
         }
-        if (spxeKeyDown(S)) {
+        if (spxeKeyDown(KEY_S)) {
             pos.y -= dT / zoom;
         }
-        if (spxeKeyDown(Z)) {
+        if (spxeKeyDown(KEY_Z)) {
             zoom += dT * 0.01 * zoom;
         }
-        if (spxeKeyDown(X)) {
+        if (spxeKeyDown(KEY_X)) {
             zoom -= dT * 0.01 * zoom;
         }
         
