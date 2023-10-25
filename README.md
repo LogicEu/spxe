@@ -221,9 +221,8 @@ identifier of the key or button. For mouse input, the values are
 ```MOUSE_LEFT```, ```MOUSE_RIGHT``` and ```MOUSE_MIDDLE```. Some keyboard
 examples are ```KEY_ESCAPE```, ```KEY_SPACE```, ```KEY_CONTROL```,
 ```KEY_LEFT```, ```KEY_RIGHT```, and for character keys ```KEY_W```.
-mouse and keyboard. These macro definitions have the same identifiers and
-values as glfw input codes, they are essentially shorter and less verbose
-versions.
+These macro definitions have the same identifiers and values as glfw input codes,
+they are essentially shorter and less verbose versions.
 
 ```C
 char spxeKeyChar(void);
