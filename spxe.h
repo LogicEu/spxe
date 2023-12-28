@@ -115,7 +115,7 @@ int     spxeMouseReleased(  const int   button                              );
 void    spxeMouseVisible(   const int   visible                             );
 
 
-/* maco keyboard and mouse input values */
+/* macro keyboard and mouse input values */
 
 #define KEY_SPACE           32
 #define KEY_APOSTROPHE      39
