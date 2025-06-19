@@ -12,7 +12,7 @@ is compatible from C89 to C++20 as a header only solution.
 
 int main(void)
 {
-    Px* pixbuf = spxeStart("title", 800, 600, 100, 75);
+    Px* pixbuf = spxeStart("Hello, World!", 800, 600, 100, 75);
     while (spxeRun(pixbuf)) {
         if (spxeKeyPressed(KEY_ESCAPE)) {
             break;

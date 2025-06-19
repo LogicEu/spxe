@@ -63,7 +63,7 @@ Windows:    -lopengl32 -lglfw3dll -lglew32
 
 int main(void)
 {
-    Px* pixbuf = spxeStart("spxe", 800, 600, 100, 75);
+    Px* pixbuf = spxeStart("Hello, World!", 800, 600, 100, 75);
     while (spxeRun(pixbuf)) {
         if (spxeKeyPressed(KEY_ESCAPE)) {
             break;
