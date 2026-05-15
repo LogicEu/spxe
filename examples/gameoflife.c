@@ -66,6 +66,9 @@ int main(const int argc, char** argv)
         if (spxeKeyPressed(KEY_R)) {
             pxInit(pixbuf, width * height);
         }
+        if (spxeKeyPressed(KEY_F)) {
+            spxeFullscreen();
+        }
         
         pxUpdate(pixbuf, buf, width, height);
         if (mousex >= 0 && mousex < width && mousey >= 0 && mousey < height) {

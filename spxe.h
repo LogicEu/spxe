@@ -94,6 +94,7 @@ Px*     spxeStart(          const char* title,
                             const int   winwidth,   const int   winheight, 
                             const int   scrwidth,   const int   scrheight   );
 
+void    spxeFullscreen(     void                                            );
 void    spxeScreenSize(     int*        widthptr,   int*        heightptr   );
 void    spxeWindowSize(     int*        widthptr,   int*        heightptr   );
 void    spxeBackgroundColor(const Px    px                                  );
@@ -109,6 +110,7 @@ char    spxeKeyChar(        void                                            );
 
 /* mouse input */
 void    spxeMousePos(       int*        xptr,       int*        yptr        );
+void    spxeMouseSet(       const int   x,          const int   y           );
 int     spxeMouseDown(      const int   button                              );        
 int     spxeMousePressed(   const int   button                              );
 int     spxeMouseReleased(  const int   button                              );
@@ -463,6 +465,12 @@ void spxeMousePos(int* x, int* y)
     *y = (int)((dy - hheight) / spxe.ratio.height + hheight);
 }
 
+void spxeMouseSet(const int x, const int y)
+{
+    glfwSetCursorPos(spxe.window, (double)x, (double)y);
+}
+
+
 int spxeMouseDown(const int button)
 {
     return glfwGetMouseButton(spxe.window, button);
@@ -619,6 +627,26 @@ Px* spxeStart(
     );
 
     return pixbuf;
+}
+
+void spxeFullscreen(void)
+{
+    static int winwidth = 0, winheight = 0, winposx = 0, winposy = 0, fullscreen = 0;
+    fullscreen = !fullscreen;
+    if (fullscreen) {
+        GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+        const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+        winwidth = spxe.winres.width;
+        winheight = spxe.winres.height;
+        glfwGetWindowPos(spxe.window, &winposx, &winposy);
+        glfwSetWindowMonitor(
+            spxe.window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate
+        );
+    } else {
+        glfwSetWindowMonitor(
+            spxe.window, NULL, winposx, winposy, winwidth, winheight, 0
+        );
+    }
 }
 
 void spxeBackgroundColor(const Px c)
